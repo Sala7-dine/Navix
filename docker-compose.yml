@@ -1,0 +1,41 @@
+services:
+  backend:
+    build: ./backend
+    container_name: fleet_backend
+    restart: always
+    env_file: ./backend/.env  
+    ports:
+      - "5002:5000"
+    depends_on:
+      - mongo
+    networks:
+      - fleetnet
+
+  frontend:
+    build: ./frontend
+    container_name: fleet_frontend
+    restart: always
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+    networks:
+      - fleetnet
+
+  mongo:
+    image: mongo:7.0
+    platform: linux/arm64
+    container_name: fleet_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - fleetnet
+
+networks:
+  fleetnet:
+
+volumes:
+  mongo_data:

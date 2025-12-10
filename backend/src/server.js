@@ -1,0 +1,56 @@
+import express from "express";
+import connectDB from "./config/db.js";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import userRoutes from "./routes/authRoutes.js";
+import notFound from "./middlewares/notFound.js";
+import authRoutes from './routes/authRoutes.js';
+import { authenticate } from './middlewares/authMiddleware.js';
+import helmet from 'helmet';
+import cors from 'cors';
+
+const app = express();
+
+dotenv.config();
+
+const Port = process.env.PORT || 3000;
+const MongoUri = process.env.MONGO_URI;
+
+app.use(
+  cors({
+    origin: true, // l'URL exacte de ton frontend
+    credentials: true,
+  })
+);
+
+app.use(cookieParser());
+app.use(express.json());
+
+// secure headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Middleware pour ajouter les headers cross-origin aux images
+app.use('/images', (req, res, next) => {
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+}, express.static('public'));
+
+// Routes publiques
+app.use('/api/auth', authRoutes);
+
+// Routes protégées par authentification
+app.use('/api/users', userRoutes);
+
+app.use(notFound);
+
+if (process.env.NODE_ENV !== 'test') {
+    await connectDB(MongoUri);
+    app.listen(Port, () => {
+        console.log(`Server successfully connected to http://localhost:${Port}`);
+    });
+}
+
+export default app;
