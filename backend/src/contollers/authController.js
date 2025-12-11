@@ -13,7 +13,6 @@ export async function register(req, res) {
   }
 }
 
-
 // Login : envoie accessToken dans body, refreshToken dans cookie HTTP-only
 export async function login(req, res) {
   try {
