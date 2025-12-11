@@ -23,6 +23,22 @@ const UserSchema = new mongoose.Schema(
       enum: ['admin', 'chauffeur'],
       default: 'chauffeur',
     },
+    telephone: {
+      type: String,
+      trim: true,
+    },
+    dateEmbauche: {
+      type: Date,
+    },
+    numeroPermis: {
+      type: String,
+      trim: true,
+      unique: true,
+      sparse: true,
+    },
+    dateExpirationPermis: {
+      type: Date,
+    },
     profileImage: {
       type: String,
       default: null,
@@ -31,10 +47,33 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    status : {
+      type : Boolean,
+      default : false
+    }
   },
 
   { timestamps: true },
 );
+
+
+// Index pour optimiser les recherches par email
+UserSchema.index({ email: 1 });
+
+// Index pour optimiser les recherches par rôle
+UserSchema.index({ role: 1 });
+
+// Virtual pour obtenir tous les trajets du chauffeur
+UserSchema.virtual('trajets', {
+  ref: 'Trajet',
+  localField: '_id',
+  foreignField: 'chauffeur',
+});
+
+// Méthode statique pour trouver les chauffeurs actifs
+// UserSchema.statics.findChauffeurs = function () {
+//   return this.find({ role: 'chauffeur', isDelete: false });
+// };
 
 UserSchema.methods.setPassword = async function (password) {
   this.password = await bcrypt.hash(password, 10);

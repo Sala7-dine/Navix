@@ -3,9 +3,14 @@ services:
     build: ./backend
     container_name: fleet_backend
     restart: always
-    env_file: ./backend/.env  
+    env_file: ./backend/.env
+    environment:
+      - NODE_ENV=development
     ports:
       - "5002:5000"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/package.json:/app/package.json
     depends_on:
       - mongo
     networks:
