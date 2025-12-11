@@ -21,10 +21,10 @@ const trajetSchema = new mongoose.Schema(
     statut: {
       type: String,
       enum: {
-        values: ['A_FAIRE', 'EN_COURS', 'TERMINE', 'ANNULE'],
+        values: ['PLANIFIE', 'EN_COURS', 'TERMINE', 'ANNULE'],
         message: '{VALUE} n\'est pas un statut valide',
       },
-      default: 'A_FAIRE',
+      default: 'PLANIFIE',
     },
     lieuDepart: {
       type: String,
@@ -76,6 +76,10 @@ const trajetSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: [1000, 'Les remarques ne peuvent pas dépasser 1000 caractères'],
+    },
+    volumeGasoilRestant: {
+      type: Number,
+      min: [0, 'Le volume de gasoil ne peut pas être négatif'],
     },
   },
   {
@@ -147,29 +151,29 @@ trajetSchema.virtual('fuelLogs', {
 // };
 
 // Méthode d'instance pour terminer un trajet
-// trajetSchema.methods.terminer = function (kilometrageArrivee, dateArrivee = new Date()) {
-//   if (this.statut !== 'EN_COURS') {
-//     throw new Error('Seul un trajet en cours peut être terminé');
-//   }
+trajetSchema.methods.terminer = function (kilometrageArrivee, dateArrivee = new Date()) {
+  if (this.statut !== 'EN_COURS') {
+    throw new Error('Seul un trajet en cours peut être terminé');
+  }
   
-//   this.statut = 'TERMINE';
-//   this.kilometrageArrivee = kilometrageArrivee;
-//   this.dateArrivee = dateArrivee;
+  this.statut = 'TERMINE';
+  this.kilometrageArrivee = kilometrageArrivee;
+  this.dateArrivee = dateArrivee;
   
-//   return this.save();
-// };
+  return this.save();
+};
 
 // Méthode d'instance pour démarrer un trajet
-// trajetSchema.methods.demarrer = function () {
-//   if (this.statut !== 'A_FAIRE') {
-//     throw new Error('Seul un trajet à faire peut être démarré');
-//   }
+trajetSchema.methods.demarrer = function () {
+  if (this.statut !== 'A_FAIRE') {
+    throw new Error('Seul un trajet à faire peut être démarré');
+  }
   
-//   this.statut = 'EN_COURS';
-//   this.dateDepart = new Date();
+  this.statut = 'EN_COURS';
+  this.dateDepart = new Date();
   
-//   return this.save();
-// };
+  return this.save();
+};
 
 const Trajet = mongoose.model('Trajet', trajetSchema);
 

@@ -30,6 +30,27 @@ const camionSchema = new mongoose.Schema(
       min: [0, 'Le kilométrage doit être positif'],
       default: 0,
     },
+    derniereMAJKilometrage: {
+      type: Date,
+      default: Date.now,
+    },
+    alertesMaintenance: [{
+      type: {
+        type: String,
+        enum: ['VIDANGE', 'REVISION', 'AUTRE']
+      },
+      niveau: {
+        type: String,
+        enum: ['ALERTE', 'URGENT']
+      },
+      message: String,
+      kmDepuis: Number,
+      seuil: Number,
+      dateAlerte: {
+        type: Date,
+        default: Date.now
+      }
+    }],
     status: {
       type: String,
       enum: {

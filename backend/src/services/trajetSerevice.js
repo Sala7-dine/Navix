@@ -1,8 +1,25 @@
 import Trajet from "../models/Trajet.js";
 import Camion from "../models/Camion.js";
+import User from "../models/User.js";
 
 export const createTrajet = async (trajetData) => {
+
     try {
+        
+        // Vérifier que le chauffeur existe et est valide
+        if (trajetData.chauffeur) {
+
+            const chauffeur = await User.findOne({ 
+                _id: trajetData.chauffeur, 
+                role: 'chauffeur', 
+                isDelete: false 
+            });
+
+            if (!chauffeur) {
+                throw new Error('Chauffeur introuvable ou invalide');
+            }
+        }
+
         // Vérifier que le camion est disponible
         const camion = await Camion.findById(trajetData.camion);
         if (!camion) {
@@ -12,12 +29,19 @@ export const createTrajet = async (trajetData) => {
             throw new Error('Le camion n\'est pas disponible');
         }
 
-        const trajet = await Trajet.create(trajetData);
+        // Préparer les données du trajet avec le kilométrage de départ
+        const trajetComplet = {
+            ...trajetData,
+            statut: trajetData.statut || 'PLANIFIE',
+            kilometrageDepart: camion.kilometrageActuel
+        };
+
+        const trajet = await Trajet.create(trajetComplet);
         
-        // Mettre à jour le statut du camion
-        await Camion.findByIdAndUpdate(trajetData.camion, {
-            status: trajetData.statut === 'EN_COURS' ? 'EN_TRAJET' : 'DISPONIBLE'
-        });
+        // Mettre à jour le statut du camion si le trajet démarre immédiatement
+        if (trajet.statut === 'EN_COURS') {
+            await Camion.findByIdAndUpdate(trajetData.camion, { status: 'EN_TRAJET' });
+        }
         
         return await trajet.populate(['chauffeur', 'camion', 'remorque']);
     } catch(err) {
@@ -155,3 +179,235 @@ export const getTrajetsByChauffeur = async (chauffeurId) => {
         throw new Error(err.message);
     }
 }
+
+// ============ NOUVELLES FONCTIONNALITÉS ============
+
+/**
+ * Chauffeur: Mettre à jour le statut du trajet (PLANIFIE -> EN_COURS -> TERMINE)
+ */
+export const updateStatutTrajet = async (trajetId, nouveauStatut, chauffeurId, data = {}) => {
+    try {
+        const trajet = await Trajet.findById(trajetId);
+        if (!trajet) {
+            throw new Error('Trajet introuvable');
+        }
+
+        // Vérifier que le chauffeur est bien assigné à ce trajet
+        if (trajet.chauffeur.toString() !== chauffeurId.toString()) {
+            throw new Error('Vous n\'êtes pas autorisé à modifier ce trajet');
+        }
+
+        // Valider les transitions de statut
+        const transitionsValides = {
+            'PLANIFIE': ['EN_COURS'],
+            'EN_COURS': ['TERMINE'],
+            'TERMINE': []
+        };
+
+        if (!transitionsValides[trajet.statut].includes(nouveauStatut)) {
+            throw new Error(`Transition de statut invalide: ${trajet.statut} -> ${nouveauStatut}`);
+        }
+
+        // Mettre à jour selon le nouveau statut
+        if (nouveauStatut === 'EN_COURS') {
+            await trajet.demarrer();
+            await Camion.findByIdAndUpdate(trajet.camion, { status: 'EN_TRAJET' });
+        } else if (nouveauStatut === 'TERMINE') {
+            if (!data.kilometrageArrivee) {
+                throw new Error('Le kilométrage d\'arrivée est requis');
+            }
+            await trajet.terminer(data.kilometrageArrivee, data.dateArrivee || new Date());
+            
+            // Mise à jour automatique du kilométrage du camion
+            await updateKilometrageCamion(trajet.camion, data.kilometrageArrivee);
+            
+            // Libérer le camion
+            await Camion.findByIdAndUpdate(trajet.camion, { status: 'DISPONIBLE' });
+            
+            // Vérifier les alertes de maintenance
+            await verifierAlertesMaintenance(trajet.camion);
+        }
+
+        return await trajet.populate(['chauffeur', 'camion', 'remorque']);
+    } catch(err) {
+        throw new Error(err.message);
+    }
+}
+
+/**
+ * Chauffeur: Valider kilométrage arrivée et volume gasoil
+ */
+export const validerFinTrajet = async (trajetId, chauffeurId, { kilometrageArrivee, volumeGasoilRestant }) => {
+    try {
+        const trajet = await Trajet.findById(trajetId).populate('camion');
+        if (!trajet) {
+            throw new Error('Trajet introuvable');
+        }
+
+        // Vérifier que le chauffeur est bien assigné
+        if (trajet.chauffeur.toString() !== chauffeurId.toString()) {
+            throw new Error('Vous n\'êtes pas autorisé à valider ce trajet');
+        }
+
+        // Vérifier que le trajet est en cours
+        if (trajet.statut !== 'EN_COURS') {
+            throw new Error('Le trajet doit être en cours pour être validé');
+        }
+
+        // Validations
+        if (!kilometrageArrivee || kilometrageArrivee <= trajet.kilometrageDepart) {
+            throw new Error('Le kilométrage d\'arrivée doit être supérieur au kilométrage de départ');
+        }
+
+        if (volumeGasoilRestant !== undefined) {
+            if (volumeGasoilRestant < 0 || volumeGasoilRestant > trajet.camion.capaciteReservoir) {
+                throw new Error(`Volume de gasoil invalide (doit être entre 0 et ${trajet.camion.capaciteReservoir}L)`);
+            }
+        }
+
+        // Terminer le trajet
+        await trajet.terminer(kilometrageArrivee, new Date());
+        
+        // Mise à jour automatique du kilométrage du camion
+        await updateKilometrageCamion(trajet.camion._id, kilometrageArrivee);
+        
+        // Enregistrer le volume de gasoil restant si fourni
+        if (volumeGasoilRestant !== undefined) {
+            trajet.volumeGasoilRestant = volumeGasoilRestant;
+            await trajet.save();
+        }
+        
+        // Libérer le camion
+        await Camion.findByIdAndUpdate(trajet.camion._id, { status: 'DISPONIBLE' });
+        
+        // Vérifier les alertes de maintenance
+        const alertes = await verifierAlertesMaintenance(trajet.camion._id);
+
+        return {
+            trajet: await trajet.populate(['chauffeur', 'camion', 'remorque']),
+            alertesMaintenance: alertes
+        };
+    } catch(err) {
+        throw new Error(err.message);
+    }
+}
+
+/**
+ * Mise à jour automatique du kilométrage total du camion
+ */
+const updateKilometrageCamion = async (camionId, nouveauKilometrage) => {
+    try {
+        const camion = await Camion.findById(camionId);
+        if (!camion) {
+            throw new Error('Camion introuvable');
+        }
+
+        // Vérifier que le nouveau kilométrage est supérieur à l'ancien
+        if (nouveauKilometrage < camion.kilometrageActuel) {
+            throw new Error(`Le nouveau kilométrage (${nouveauKilometrage} km) ne peut pas être inférieur au kilométrage actuel (${camion.kilometrageActuel} km)`);
+        }
+
+        camion.kilometrageActuel = nouveauKilometrage;
+        camion.derniereMAJKilometrage = new Date();
+        await camion.save();
+
+        return camion;
+    } catch(err) {
+        throw new Error(err.message);
+    }
+}
+
+/**
+ * Système de règles de maintenance avec alertes automatiques
+ */
+const verifierAlertesMaintenance = async (camionId) => {
+    try {
+        const camion = await Camion.findById(camionId);
+        if (!camion) {
+            throw new Error('Camion introuvable');
+        }
+
+        const Maintenance = (await import('../models/Maintenance.js')).default;
+        
+        // Récupérer la dernière maintenance de chaque type
+        const derniereVidange = await Maintenance.findOne({
+            camion: camionId,
+            type: 'VIDANGE'
+        }).sort({ date: -1 });
+
+        const derniereRevision = await Maintenance.findOne({
+            camion: camionId,
+            type: 'REVISION'
+        }).sort({ date: -1 });
+
+        const alertes = [];
+
+        // Règles de maintenance
+        const SEUILS = {
+            VIDANGE: 10000, // km
+            REVISION: 30000, // km
+            VIDANGE_URGENT: 11000, // km (alerte urgente)
+            REVISION_URGENTE: 32000 // km (alerte urgente)
+        };
+
+        // Calculer les km depuis la dernière vidange
+        const kmDepuisVidange = derniereVidange 
+            ? camion.kilometrageActuel - derniereVidange.kilometrageAuMoment
+            : camion.kilometrageActuel;
+
+        if (kmDepuisVidange >= SEUILS.VIDANGE_URGENT) {
+            alertes.push({
+                type: 'VIDANGE',
+                niveau: 'URGENT',
+                message: `Vidange URGENTE requise ! ${kmDepuisVidange} km depuis la dernière vidange`,
+                kmDepuis: kmDepuisVidange,
+                seuil: SEUILS.VIDANGE_URGENT
+            });
+        } else if (kmDepuisVidange >= SEUILS.VIDANGE) {
+            alertes.push({
+                type: 'VIDANGE',
+                niveau: 'ALERTE',
+                message: `Vidange recommandée : ${kmDepuisVidange} km depuis la dernière vidange`,
+                kmDepuis: kmDepuisVidange,
+                seuil: SEUILS.VIDANGE
+            });
+        }
+
+        // Calculer les km depuis la dernière révision
+        const kmDepuisRevision = derniereRevision
+            ? camion.kilometrageActuel - derniereRevision.kilometrageAuMoment
+            : camion.kilometrageActuel;
+
+        if (kmDepuisRevision >= SEUILS.REVISION_URGENTE) {
+            alertes.push({
+                type: 'REVISION',
+                niveau: 'URGENT',
+                message: `Révision URGENTE requise ! ${kmDepuisRevision} km depuis la dernière révision`,
+                kmDepuis: kmDepuisRevision,
+                seuil: SEUILS.REVISION_URGENTE
+            });
+        } else if (kmDepuisRevision >= SEUILS.REVISION) {
+            alertes.push({
+                type: 'REVISION',
+                niveau: 'ALERTE',
+                message: `Révision recommandée : ${kmDepuisRevision} km depuis la dernière révision`,
+                kmDepuis: kmDepuisRevision,
+                seuil: SEUILS.REVISION
+            });
+        }
+
+        // Mettre le camion en maintenance si alerte urgente
+        if (alertes.some(a => a.niveau === 'URGENT')) {
+            await Camion.findByIdAndUpdate(camionId, {
+                status: 'MAINTENANCE',
+                alertesMaintenance: alertes
+            });
+        }
+
+        return alertes;
+    } catch(err) {
+        throw new Error(err.message);
+    }
+}
+
+export { updateKilometrageCamion, verifierAlertesMaintenance };
