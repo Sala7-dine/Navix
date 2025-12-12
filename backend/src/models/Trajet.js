@@ -112,20 +112,20 @@ trajetSchema.pre('deleteOne', { document: true, query: false }, async function (
 });
 
 // Virtual pour calculer la distance parcourue
-// trajetSchema.virtual('distanceParcourue').get(function () {
-//   if (this.kilometrageArrivee && this.kilometrageDepart) {
-//     return this.kilometrageArrivee - this.kilometrageDepart;
-//   }
-//   return null;
-// });
+trajetSchema.virtual('distanceParcourue').get(function () {
+  if (this.kilometrageArrivee && this.kilometrageDepart) {
+    return this.kilometrageArrivee - this.kilometrageDepart;
+  }
+  return null;
+});
 
 // Virtual pour calculer la durée du trajet
-// trajetSchema.virtual('duree').get(function () {
-//   if (this.dateArrivee && this.dateDepart) {
-//     return Math.floor((this.dateArrivee - this.dateDepart) / (1000 * 60 * 60)); // en heures
-//   }
-//   return null;
-// });
+trajetSchema.virtual('duree').get(function () {
+  if (this.dateArrivee && this.dateDepart) {
+    return Math.floor((this.dateArrivee - this.dateDepart) / (1000 * 60 * 60)); // en heures
+  }
+  return null;
+});
 
 // Virtual pour obtenir tous les FuelLogs du trajet
 trajetSchema.virtual('fuelLogs', {
@@ -135,20 +135,20 @@ trajetSchema.virtual('fuelLogs', {
 });
 
 // Méthode statique pour trouver les trajets en cours
-// trajetSchema.statics.findEnCours = function () {
-//   return this.find({ statut: 'EN_COURS' })
-//     .populate('chauffeur', 'fullName email')
-//     .populate('camion', 'matricule marque modele')
-//     .populate('remorque', 'matricule type');
-// };
+trajetSchema.statics.findEnCours = function () {
+  return this.find({ statut: 'EN_COURS' })
+    .populate('chauffeur', 'fullName email')
+    .populate('camion', 'matricule marque modele')
+    .populate('remorque', 'matricule type');
+};
 
 // Méthode statique pour trouver les trajets par chauffeur
-// trajetSchema.statics.findByChauffeur = function (chauffeurId) {
-//   return this.find({ chauffeur: chauffeurId })
-//     .populate('camion', 'matricule marque modele')
-//     .populate('remorque', 'matricule type')
-//     .sort({ dateDepart: -1 });
-// };
+trajetSchema.statics.findByChauffeur = function (chauffeurId) {
+  return this.find({ chauffeur: chauffeurId })
+    .populate('camion', 'matricule marque modele')
+    .populate('remorque', 'matricule type')
+    .sort({ dateDepart: -1 });
+};
 
 // Méthode d'instance pour terminer un trajet
 trajetSchema.methods.terminer = function (kilometrageArrivee, dateArrivee = new Date()) {

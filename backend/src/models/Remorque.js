@@ -51,9 +51,9 @@ remorqueSchema.virtual('trajets', {
 });
 
 // Méthode statique pour trouver les remorques par type
-// remorqueSchema.statics.findByType = function (type) {
-//   return this.find({ type });
-// };
+remorqueSchema.statics.findByType = function (type) {
+  return this.find({ type });
+};
 
 const Remorque = mongoose.model('Remorque', remorqueSchema);
 

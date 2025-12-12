@@ -3,6 +3,7 @@ import Camion from "../models/Camion.js";
 import Pneu from "../models/Pneu.js";
 
 export const createMaintenance = async (maintenanceData) => {
+
     try {
         // Vérifier que le camion existe si fourni
         if (maintenanceData.camion) {

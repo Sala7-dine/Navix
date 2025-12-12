@@ -67,9 +67,9 @@ UserSchema.virtual('trajets', {
 });
 
 // Méthode statique pour trouver les chauffeurs actifs
-// UserSchema.statics.findChauffeurs = function () {
-//   return this.find({ role: 'chauffeur', isDelete: false });
-// };
+UserSchema.statics.findChauffeurs = function () {
+  return this.find({ role: 'chauffeur', isDelete: false });
+};
 
 UserSchema.methods.setPassword = async function (password) {
   this.password = await bcrypt.hash(password, 10);

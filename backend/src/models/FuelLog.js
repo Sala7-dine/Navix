@@ -48,12 +48,12 @@ fuelLogSchema.index({ trajet: 1, date: -1 });
 fuelLogSchema.index({ date: -1 });
 
 // Middleware pre-save pour calculer automatiquement le prix par litre
-// fuelLogSchema.pre('save', function (next) {
-//   if (this.volumeLitres > 0 && this.prixTotal >= 0) {
-//     this.prixParLitre = this.prixTotal / this.volumeLitres;
-//   }
-//   next();
-// });
+fuelLogSchema.pre('save', function (next) {
+  if (this.volumeLitres > 0 && this.prixTotal >= 0) {
+    this.prixParLitre = this.prixTotal / this.volumeLitres;
+  }
+  next();
+});
 
 // Virtual pour obtenir les informations du trajet
 fuelLogSchema.virtual('trajetInfo', {
@@ -64,52 +64,52 @@ fuelLogSchema.virtual('trajetInfo', {
 });
 
 // Méthode statique pour calculer le coût total de carburant par trajet
-// fuelLogSchema.statics.calculateTotalByTrajet = function (trajetId) {
-//   return this.aggregate([
-//     { $match: { trajet: mongoose.Types.ObjectId(trajetId) } },
-//     {
-//       $group: {
-//         _id: '$trajet',
-//         totalVolume: { $sum: '$volumeLitres' },
-//         totalCout: { $sum: '$prixTotal' },
-//         prixMoyenParLitre: { $avg: '$prixParLitre' },
-//         nombreRavitaillements: { $sum: 1 },
-//       },
-//     },
-//   ]);
-// };
+fuelLogSchema.statics.calculateTotalByTrajet = function (trajetId) {
+  return this.aggregate([
+    { $match: { trajet: mongoose.Types.ObjectId(trajetId) } },
+    {
+      $group: {
+        _id: '$trajet',
+        totalVolume: { $sum: '$volumeLitres' },
+        totalCout: { $sum: '$prixTotal' },
+        prixMoyenParLitre: { $avg: '$prixParLitre' },
+        nombreRavitaillements: { $sum: 1 },
+      },
+    },
+  ]);
+};
 
 // Méthode statique pour obtenir les statistiques de carburant d'une période
-// fuelLogSchema.statics.getStatsByPeriode = function (dateDebut, dateFin) {
-//   return this.aggregate([
-//     {
-//       $match: {
-//         date: {
-//           $gte: dateDebut,
-//           $lte: dateFin,
-//         },
-//       },
-//     },
-//     {
-//       $group: {
-//         _id: null,
-//         totalVolume: { $sum: '$volumeLitres' },
-//         totalCout: { $sum: '$prixTotal' },
-//         prixMoyenParLitre: { $avg: '$prixParLitre' },
-//         nombreRavitaillements: { $sum: 1 },
-//       },
-//     },
-//   ]);
-// };
+fuelLogSchema.statics.getStatsByPeriode = function (dateDebut, dateFin) {
+  return this.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: dateDebut,
+          $lte: dateFin,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalVolume: { $sum: '$volumeLitres' },
+        totalCout: { $sum: '$prixTotal' },
+        prixMoyenParLitre: { $avg: '$prixParLitre' },
+        nombreRavitaillements: { $sum: 1 },
+      },
+    },
+  ]);
+};
 
 // Méthode d'instance pour obtenir la consommation
-// fuelLogSchema.methods.getConsommation = async function () {
-//   const trajet = await mongoose.model('Trajet').findById(this.trajet);
-//   if (trajet && trajet.distanceParcourue) {
-//     return (this.volumeLitres / trajet.distanceParcourue) * 100; // L/100km
-//   }
-//   return null;
-// };
+fuelLogSchema.methods.getConsommation = async function () {
+  const trajet = await mongoose.model('Trajet').findById(this.trajet);
+  if (trajet && trajet.distanceParcourue) {
+    return (this.volumeLitres / trajet.distanceParcourue) * 100; // L/100km
+  }
+  return null;
+};
 
 const FuelLog = mongoose.model('FuelLog', fuelLogSchema);
 

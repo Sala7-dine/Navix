@@ -66,9 +66,9 @@ pneuSchema.virtual('maintenances', {
 });
 
 // Méthode virtuelle pour vérifier si le pneu doit être changé
-// pneuSchema.virtual('doitEtreChange').get(function () {
-//   return this.usurePourcentage >= 80;
-// });
+pneuSchema.virtual('doitEtreChange').get(function () {
+  return this.usurePourcentage >= 80;
+});
 
 
 const Pneu = mongoose.model('Pneu', pneuSchema);

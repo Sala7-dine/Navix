@@ -145,51 +145,51 @@ maintenanceSchema.index({ statut: 1 });
 maintenanceSchema.index({ statut: 1, date: 1 });
 
 // Virtual pour calculer le coût total incluant les pièces
-// maintenanceSchema.virtual('coutTotal').get(function () {
-//   let total = this.cout || 0;
-//   if (this.pieceRemplacees && this.pieceRemplacees.length > 0) {
-//     const coutPieces = this.pieceRemplacees.reduce((sum, piece) => {
-//       return sum + (piece.prix || 0) * (piece.quantite || 1);
-//     }, 0);
-//     total += coutPieces;
-//   }
-//   return total;
-// });
+maintenanceSchema.virtual('coutTotal').get(function () {
+  let total = this.cout || 0;
+  if (this.pieceRemplacees && this.pieceRemplacees.length > 0) {
+    const coutPieces = this.pieceRemplacees.reduce((sum, piece) => {
+      return sum + (piece.prix || 0) * (piece.quantite || 1);
+    }, 0);
+    total += coutPieces;
+  }
+  return total;
+});
 
 // Méthode statique pour trouver les maintenances par camion
-// maintenanceSchema.statics.findByCamion = function (camionId) {
-//   return this.find({ camion: camionId })
-//     .sort({ date: -1 })
-//     .populate('pneu', 'position usurePourcentage');
-// };
+maintenanceSchema.statics.findByCamion = function (camionId) {
+  return this.find({ camion: camionId })
+    .sort({ date: -1 })
+    .populate('pneu', 'position usurePourcentage');
+};
 
 // Méthode statique pour trouver les maintenances planifiées
-// maintenanceSchema.statics.findPlanifiees = function () {
-//   return this.find({ statut: 'PLANIFIEE' })
-//     .sort({ date: 1 })
-//     .populate('camion', 'matricule marque modele')
-//     .populate('pneu', 'position usurePourcentage');
-// };
+maintenanceSchema.statics.findPlanifiees = function () {
+  return this.find({ statut: 'PLANIFIEE' })
+    .sort({ date: 1 })
+    .populate('camion', 'matricule marque modele')
+    .populate('pneu', 'position usurePourcentage');
+};
 
 // Méthode statique pour calculer le coût total des maintenances par camion
-// maintenanceSchema.statics.calculateCoutByCamion = function (camionId, dateDebut, dateFin) {
-//   const match = { camion: mongoose.Types.ObjectId(camionId) };
+maintenanceSchema.statics.calculateCoutByCamion = function (camionId, dateDebut, dateFin) {
+  const match = { camion: new mongoose.Types.ObjectId(camionId) };
   
-//   if (dateDebut && dateFin) {
-//     match.date = { $gte: dateDebut, $lte: dateFin };
-//   }
+  if (dateDebut && dateFin) {
+    match.date = { $gte: dateDebut, $lte: dateFin };
+  }
   
-//   return this.aggregate([
-//     { $match: match },
-//     {
-//       $group: {
-//         _id: '$camion',
-//         totalCout: { $sum: '$cout' },
-//         nombreMaintenances: { $sum: 1 },
-//       },
-//     },
-//   ]);
-// };
+  return this.aggregate([
+    { $match: match },
+    {
+      $group: {
+        _id: '$camion',
+        totalCout: { $sum: '$cout' },
+        nombreMaintenances: { $sum: 1 },
+      },
+    },
+  ]);
+};
 
 // Méthode statique pour obtenir les statistiques par type
 maintenanceSchema.statics.getStatsByType = function (dateDebut, dateFin) {
@@ -214,25 +214,25 @@ maintenanceSchema.statics.getStatsByType = function (dateDebut, dateFin) {
 };
 
 // Méthode d'instance pour terminer une maintenance
-// maintenanceSchema.methods.terminer = function () {
-//   if (this.statut !== 'EN_COURS') {
-//     throw new Error('Seule une maintenance en cours peut être terminée');
-//   }
+maintenanceSchema.methods.terminer = function () {
+  if (this.statut !== 'EN_COURS') {
+    throw new Error('Seule une maintenance en cours peut être terminée');
+  }
   
-//   this.statut = 'TERMINEE';
-//   return this.save();
-// };
+  this.statut = 'TERMINEE';
+  return this.save();
+};
 
 // Méthode d'instance pour démarrer une maintenance
-// maintenanceSchema.methods.demarrer = function () {
-//   if (this.statut !== 'PLANIFIEE') {
-//     throw new Error('Seule une maintenance planifiée peut être démarrée');
-//   }
+maintenanceSchema.methods.demarrer = function () {
+  if (this.statut !== 'PLANIFIEE') {
+    throw new Error('Seule une maintenance planifiée peut être démarrée');
+  }
   
-//   this.statut = 'EN_COURS';
-//   this.date = new Date();
-//   return this.save();
-// };
+  this.statut = 'EN_COURS';
+  this.date = new Date();
+  return this.save();
+};
 
 const Maintenance = mongoose.model('Maintenance', maintenanceSchema);
 
