@@ -165,7 +165,7 @@ trajetSchema.methods.terminer = function (kilometrageArrivee, dateArrivee = new 
 
 // Méthode d'instance pour démarrer un trajet
 trajetSchema.methods.demarrer = function () {
-  if (this.statut !== 'A_FAIRE') {
+  if (this.statut !== 'PLANIFIE') {
     throw new Error('Seul un trajet à faire peut être démarré');
   }
   

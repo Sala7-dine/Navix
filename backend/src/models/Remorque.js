@@ -21,7 +21,7 @@ const remorqueSchema = new mongoose.Schema(
       status: {
           type: String,
           enum: {
-              values: ['DISPONIBLE', 'EN_TRAJET', 'MAINTENANCE'],
+              values: ['DISPONIBLE', 'EN_MISSION', 'EN_TRAJET'],
               message: '{VALUE} n\'est pas un statut valide',
           },
           default: 'DISPONIBLE',

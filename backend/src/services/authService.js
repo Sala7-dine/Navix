@@ -15,7 +15,7 @@ export async function register({ email, password, fullName, roles }) {
 
     const user = new User({ email, fullName, roles });
     await user.setPassword(password);
-    await user.save();
+    await user.save().select;
 
     const jti = generateJti();
     const refreshToken = signRefreshToken({ sub: user._id, jti });
@@ -29,8 +29,14 @@ export async function register({ email, password, fullName, roles }) {
       expiresAt,
     });
 
-    const accessToken = signAccessToken({ sub: user._id, roles: user.roles });
-    return { user, accessToken, refreshToken };
+    const newUser = {
+        fullName: user.fullName,
+        email: user.email,
+        role : user.role
+    }
+
+    const accessToken = signAccessToken({ sub: user._id, roles: user.role });
+    return {  newUser , accessToken, refreshToken };
   } catch (err) {
     throw err;
   }

@@ -1,0 +1,1567 @@
+{
+	"info": {
+		"_postman_id": "navix-api-collection",
+		"name": "Navix API - Transport Management",
+		"description": "Collection complète pour tester l'API Navix - Gestion de Transport de Camions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000/api",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('accessToken', response.accessToken);",
+									"    pm.environment.set('refreshToken', response.refreshToken);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Admin User\",\n    \"email\": \"admin@navix.com\",\n    \"password\": \"Admin123!\",\n    \"telephone\": \"0612345678\",\n    \"role\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', response.accessToken);",
+									"    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@navix.com\",\n    \"password\": \"Admin123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', response.accessToken);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "refresh"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create User (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Jean Dupont\",\n    \"email\": \"jean.dupont@navix.com\",\n    \"password\": \"Chauffeur123!\",\n    \"telephone\": \"0623456789\",\n    \"role\": \"chauffeur\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/create",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "create"]
+						}
+					}
+				},
+				{
+					"name": "Get All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"]
+						}
+					}
+				},
+				{
+					"name": "Get Chauffeurs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/chauffeurs",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "chauffeurs"]
+						}
+					}
+				},
+				{
+					"name": "Get User By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "USER_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update User (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Jean Dupont Updated\",\n    \"telephone\": \"0698765432\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/update/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "update", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "USER_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete User (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/delete/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "delete", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "USER_ID"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Camions",
+			"item": [
+				{
+					"name": "Create Camion (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"matricule\": \"AB-123-CD\",\n    \"marque\": \"Renault\",\n    \"modele\": \"T High 520\",\n    \"capaciteReservoir\": 500,\n    \"kilometrageActuel\": 150000,\n    \"status\": \"DISPONIBLE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/camions/create",
+							"host": ["{{baseUrl}}"],
+							"path": ["camions", "create"]
+						}
+					}
+				},
+				{
+					"name": "Get All Camions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/camions",
+							"host": ["{{baseUrl}}"],
+							"path": ["camions"]
+						}
+					}
+				},
+				{
+					"name": "Get Camions Disponibles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/camions/disponibles",
+							"host": ["{{baseUrl}}"],
+							"path": ["camions", "disponibles"]
+						}
+					}
+				},
+				{
+					"name": "Get Camion By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/camions/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["camions", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "CAMION_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Camion (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"kilometrageActuel\": 155000,\n    \"status\": \"DISPONIBLE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/camions/update/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["camions", "update", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "CAMION_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Camion (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/camions/delete/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["camions", "delete", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "CAMION_ID"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Trajets",
+			"item": [
+				{
+					"name": "Create Trajet (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chauffeur\": \"CHAUFFEUR_ID\",\n    \"camion\": \"CAMION_ID\",\n    \"remorque\": \"REMORQUE_ID\",\n    \"lieuDepart\": \"Paris\",\n    \"lieuArrivee\": \"Marseille\",\n    \"dateDepart\": \"2025-12-15T08:00:00.000Z\",\n    \"description\": \"Livraison de marchandises\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/trajets/create",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", "create"]
+						}
+					}
+				},
+				{
+					"name": "Get All Trajets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/trajets",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets"]
+						}
+					}
+				},
+				{
+					"name": "Get Trajets By Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/trajets?statut=PLANIFIE",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets"],
+							"query": [
+								{
+									"key": "statut",
+									"value": "PLANIFIE",
+									"description": "PLANIFIE, EN_COURS, TERMINE, ANNULE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Trajets En Cours",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/trajets/en-cours",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", "en-cours"]
+						}
+					}
+				},
+				{
+					"name": "Get Mes Trajets (Chauffeur)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/trajets/chauffeur/mes-trajets",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", "chauffeur", "mes-trajets"]
+						}
+					}
+				},
+				{
+					"name": "Get Trajets By Chauffeur ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/trajets/chauffeur/:chauffeurId",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", "chauffeur", ":chauffeurId"],
+							"variable": [
+								{
+									"key": "chauffeurId",
+									"value": "CHAUFFEUR_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Trajet By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/trajets/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Statut Trajet (Chauffeur)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"statut\": \"EN_COURS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/trajets/chauffeur/:id/statut",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", "chauffeur", ":id", "statut"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Valider Fin Trajet (Chauffeur)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"kilometrageArrivee\": 155800,\n    \"volumeGasoilRestant\": 250\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/trajets/chauffeur/:id/valider",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", "chauffeur", ":id", "valider"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Demarrer Trajet",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/trajets/:id/demarrer",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", ":id", "demarrer"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Terminer Trajet",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"kilometrageArrivee\": 155800,\n    \"dateArrivee\": \"2025-12-15T18:00:00.000Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/trajets/:id/terminer",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", ":id", "terminer"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Trajet (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lieuArrivee\": \"Lyon\",\n    \"description\": \"Livraison modifiée\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/trajets/update/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", "update", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Trajet (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/trajets/delete/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["trajets", "delete", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Remorques",
+			"item": [
+				{
+					"name": "Create Remorque (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"matricule\": \"REM-123-AB\",\n    \"type\": \"FRIGORIFIQUE\",\n    \"capacite\": 25,\n    \"status\": \"DISPONIBLE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/remorques/create",
+							"host": ["{{baseUrl}}"],
+							"path": ["remorques", "create"]
+						}
+					}
+				},
+				{
+					"name": "Get All Remorques",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/remorques",
+							"host": ["{{baseUrl}}"],
+							"path": ["remorques"]
+						}
+					}
+				},
+				{
+					"name": "Get Remorque By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/remorques/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["remorques", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REMORQUE_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Remorque (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"EN_TRAJET\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/remorques/update/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["remorques", "update", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REMORQUE_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Remorque (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/remorques/delete/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["remorques", "delete", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REMORQUE_ID"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Pneus",
+			"item": [
+				{
+					"name": "Create Pneu (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"camion\": \"CAMION_ID\",\n    \"position\": \"AVANT_GAUCHE\",\n    \"marque\": \"Michelin\",\n    \"modele\": \"XZE 2+\",\n    \"usure\": 10,\n    \"pression\": 8.5,\n    \"dateMontage\": \"2025-01-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pneus",
+							"host": ["{{baseUrl}}"],
+							"path": ["pneus"]
+						}
+					}
+				},
+				{
+					"name": "Get All Pneus",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pneus",
+							"host": ["{{baseUrl}}"],
+							"path": ["pneus"]
+						}
+					}
+				},
+				{
+					"name": "Get Pneus Critiques",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pneus/critiques",
+							"host": ["{{baseUrl}}"],
+							"path": ["pneus", "critiques"]
+						}
+					}
+				},
+				{
+					"name": "Get Pneus By Camion",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pneus/camion/:camionId",
+							"host": ["{{baseUrl}}"],
+							"path": ["pneus", "camion", ":camionId"],
+							"variable": [
+								{
+									"key": "camionId",
+									"value": "CAMION_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Pneu By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pneus/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["pneus", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "PNEU_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Pneu (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usure\": 25,\n    \"pression\": 8.0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pneus/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["pneus", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "PNEU_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Usure Pneu (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usure\": 35\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pneus/:id/usure",
+							"host": ["{{baseUrl}}"],
+							"path": ["pneus", ":id", "usure"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "PNEU_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Pneu (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pneus/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["pneus", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "PNEU_ID"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Maintenances",
+			"item": [
+				{
+					"name": "Create Maintenance (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"VIDANGE\",\n    \"description\": \"Vidange complète avec filtre\",\n    \"cout\": 250,\n    \"camion\": \"CAMION_ID\",\n    \"date\": \"2025-12-15\",\n    \"statut\": \"PLANIFIEE\",\n    \"garage\": \"Garage Central\",\n    \"kilometrageIntervention\": 155000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/maintenances",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances"]
+						}
+					}
+				},
+				{
+					"name": "Get All Maintenances",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances"]
+						}
+					}
+				},
+				{
+					"name": "Get Maintenances Planifiées",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/planifiees",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", "planifiees"]
+						}
+					}
+				},
+				{
+					"name": "Get Maintenances By Camion",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/camion/:camionId",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", "camion", ":camionId"],
+							"variable": [
+								{
+									"key": "camionId",
+									"value": "CAMION_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Stats By Type (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/stats/type",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", "stats", "type"]
+						}
+					}
+				},
+				{
+					"name": "Get Cout By Camion (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/camion/:camionId/cout",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", "camion", ":camionId", "cout"],
+							"variable": [
+								{
+									"key": "camionId",
+									"value": "CAMION_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Maintenance By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MAINTENANCE_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Maintenance (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cout\": 300,\n    \"remarques\": \"Remplacement filtre à air en plus\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MAINTENANCE_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Demarrer Maintenance (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/:id/demarrer",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", ":id", "demarrer"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MAINTENANCE_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Terminer Maintenance (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/:id/terminer",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", ":id", "terminer"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MAINTENANCE_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Maintenance (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/maintenances/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["maintenances", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MAINTENANCE_ID"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Fuel Logs",
+			"item": [
+				{
+					"name": "Create Fuel Log",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trajet\": \"TRAJET_ID\",\n    \"volume\": 250,\n    \"prix\": 350,\n    \"stationService\": \"Total Access\",\n    \"lieu\": \"Aire de Lyon Sud\",\n    \"kilometrage\": 155200\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs"]
+						}
+					}
+				},
+				{
+					"name": "Get All Fuel Logs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs"]
+						}
+					}
+				},
+				{
+					"name": "Get Fuel Logs By Trajet",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs/trajet/:trajetId",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs", "trajet", ":trajetId"],
+							"variable": [
+								{
+									"key": "trajetId",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Total By Trajet",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs/trajet/:trajetId/total",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs", "trajet", ":trajetId", "total"],
+							"variable": [
+								{
+									"key": "trajetId",
+									"value": "TRAJET_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Stats By Periode (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs/stats/periode?debut=2025-01-01&fin=2025-12-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs", "stats", "periode"],
+							"query": [
+								{
+									"key": "debut",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "fin",
+									"value": "2025-12-31"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Consommation Moyenne By Camion",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs/camion/:camionId/consommation",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs", "camion", ":camionId", "consommation"],
+							"variable": [
+								{
+									"key": "camionId",
+									"value": "CAMION_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Fuel Log By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "FUEL_LOG_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Fuel Log (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"volume\": 260,\n    \"prix\": 365\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "FUEL_LOG_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Fuel Log (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/fuel-logs/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["fuel-logs", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "FUEL_LOG_ID"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

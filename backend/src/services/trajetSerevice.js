@@ -1,18 +1,19 @@
 import Trajet from "../models/Trajet.js";
 import Camion from "../models/Camion.js";
 import User from "../models/User.js";
+import Remorque from "../models/Remorque.js";
+import Maintenance from "../models/Maintenance.js";
+import PDFDocument from "pdfkit";
 
 export const createTrajet = async (trajetData) => {
 
     try {
-        
         // Vérifier que le chauffeur existe et est valide
         if (trajetData.chauffeur) {
 
             const chauffeur = await User.findOne({ 
                 _id: trajetData.chauffeur, 
-                role: 'chauffeur', 
-                isDelete: false 
+                role: 'chauffeur'
             });
 
             if (!chauffeur) {
@@ -29,6 +30,16 @@ export const createTrajet = async (trajetData) => {
             throw new Error('Le camion n\'est pas disponible');
         }
 
+        // Vérifier que le remoruqe est disponible
+        const remorque = await Remorque.findById(trajetData.remorque);
+        if (!remorque) {
+            throw new Error('Remorque introuvable');
+        }
+        if (remorque.status !== 'DISPONIBLE') {
+            throw new Error('Le remorque n\'est pas disponible');
+        }
+
+
         // Préparer les données du trajet avec le kilométrage de départ
         const trajetComplet = {
             ...trajetData,
@@ -37,10 +48,11 @@ export const createTrajet = async (trajetData) => {
         };
 
         const trajet = await Trajet.create(trajetComplet);
-        
-        // Mettre à jour le statut du camion si le trajet démarre immédiatement
-        if (trajet.statut === 'EN_COURS') {
-            await Camion.findByIdAndUpdate(trajetData.camion, { status: 'EN_TRAJET' });
+
+        // Mettre à jour le statut du camion et remorque
+        if (trajet) {
+            await Camion.findByIdAndUpdate(trajetData.camion, { status: 'EN_MISSION' });
+            await Remorque.findByIdAndUpdate(trajetData.remorque, { status: 'EN_MISSION' });
         }
         
         return await trajet.populate(['chauffeur', 'camion', 'remorque']);
@@ -102,61 +114,18 @@ export const updateTrajet = async (id, updateData) => {
 
 export const deleteTrajet = async (id) => {
     try {
-        const trajet = await Trajet.findById(id);
+        const trajet = await Trajet.findByIdAndDelete(id);
         if (!trajet) {
             throw new Error('Trajet introuvable');
         }
         
         // Libérer le camion si le trajet était en cours
-        if (trajet.statut === 'EN_COURS') {
-            await Camion.findByIdAndUpdate(trajet.camion, {
-                status: 'DISPONIBLE'
-            });
+        if (trajet) {
+            await Camion.findByIdAndUpdate(trajet.camion, { status: 'DISPONIBLE' });
+            await Remorque.findByIdAndUpdate(trajet.remorque, { status: 'DISPONIBLE' });
         }
-        
-        await trajet.deleteOne();
+
         return trajet;
-    } catch(err) {
-        throw new Error(err.message);
-    }
-}
-
-export const demarrerTrajet = async (id) => {
-    try {
-        const trajet = await Trajet.findById(id);
-        if (!trajet) {
-            throw new Error('Trajet introuvable');
-        }
-        
-        await trajet.demarrer();
-        
-        // Mettre à jour le statut du camion
-        await Camion.findByIdAndUpdate(trajet.camion, {
-            status: 'EN_TRAJET'
-        });
-        
-        return await trajet.populate(['chauffeur', 'camion', 'remorque']);
-    } catch(err) {
-        throw new Error(err.message);
-    }
-}
-
-export const terminerTrajet = async (id, { kilometrageArrivee, dateArrivee }) => {
-    try {
-        const trajet = await Trajet.findById(id);
-        if (!trajet) {
-            throw new Error('Trajet introuvable');
-        }
-        
-        await trajet.terminer(kilometrageArrivee, dateArrivee);
-        
-        // Mettre à jour le kilométrage du camion et libérer le statut
-        await Camion.findByIdAndUpdate(trajet.camion, {
-            kilometrageActuel: kilometrageArrivee,
-            status: 'DISPONIBLE'
-        });
-        
-        return await trajet.populate(['chauffeur', 'camion', 'remorque']);
     } catch(err) {
         throw new Error(err.message);
     }
@@ -212,6 +181,7 @@ export const updateStatutTrajet = async (trajetId, nouveauStatut, chauffeurId, d
         if (nouveauStatut === 'EN_COURS') {
             await trajet.demarrer();
             await Camion.findByIdAndUpdate(trajet.camion, { status: 'EN_TRAJET' });
+            await Remorque.findByIdAndUpdate(trajet.remorque, { status: 'EN_TRAJET' });
         } else if (nouveauStatut === 'TERMINE') {
             if (!data.kilometrageArrivee) {
                 throw new Error('Le kilométrage d\'arrivée est requis');
@@ -221,9 +191,10 @@ export const updateStatutTrajet = async (trajetId, nouveauStatut, chauffeurId, d
             // Mise à jour automatique du kilométrage du camion
             await updateKilometrageCamion(trajet.camion, data.kilometrageArrivee);
             
-            // Libérer le camion
+            // Libérer le camion et remorque
             await Camion.findByIdAndUpdate(trajet.camion, { status: 'DISPONIBLE' });
-            
+            await Remorque.findByIdAndUpdate(trajet.remorque, { status: 'DISPONIBLE' });
+
             // Vérifier les alertes de maintenance
             await verifierAlertesMaintenance(trajet.camion);
         }
@@ -279,7 +250,8 @@ export const validerFinTrajet = async (trajetId, chauffeurId, { kilometrageArriv
         
         // Libérer le camion
         await Camion.findByIdAndUpdate(trajet.camion._id, { status: 'DISPONIBLE' });
-        
+        await Remorque.findByIdAndUpdate(trajet.remorque._id, { status: 'DISPONIBLE' });
+
         // Vérifier les alertes de maintenance
         const alertes = await verifierAlertesMaintenance(trajet.camion._id);
 
@@ -327,8 +299,6 @@ const verifierAlertesMaintenance = async (camionId) => {
             throw new Error('Camion introuvable');
         }
 
-        const Maintenance = (await import('../models/Maintenance.js')).default;
-        
         // Récupérer la dernière maintenance de chaque type
         const derniereVidange = await Maintenance.findOne({
             camion: camionId,
@@ -411,3 +381,218 @@ const verifierAlertesMaintenance = async (camionId) => {
 }
 
 export { updateKilometrageCamion, verifierAlertesMaintenance };
+
+/**
+ * Générer un PDF du trajet pour le chauffeur
+ */
+export const genererPDFTrajet = async (trajetId, chauffeurId) => {
+    try {
+        // Récupérer le trajet avec toutes les informations
+        const trajet = await Trajet.findById(trajetId)
+            .populate('chauffeur', 'fullName email telephone')
+            .populate('camion', 'matricule marque modele')
+            .populate('remorque', 'matricule type capacite');
+        
+        if (!trajet) {
+            throw new Error('Trajet introuvable');
+        }
+
+        // Vérifier que le chauffeur est bien assigné à ce trajet
+        if (trajet.chauffeur._id.toString() !== chauffeurId.toString()) {
+            throw new Error('Vous n\'êtes pas autorisé à télécharger ce trajet');
+        }
+
+        // Créer un document PDF
+        const doc = new PDFDocument({ margin: 50 });
+
+        // En-tête du document
+        doc.fontSize(20)
+           .font('Helvetica-Bold')
+           .text('RAPPORT DE TRAJET', { align: 'center' })
+           .moveDown(0.5);
+
+        doc.fontSize(10)
+           .font('Helvetica')
+           .text(`Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, { align: 'center' })
+           .moveDown(1.5);
+
+        // Informations du trajet
+        doc.fontSize(14)
+           .font('Helvetica-Bold')
+           .text('INFORMATIONS DU TRAJET', { underline: true })
+           .moveDown(0.5);
+
+        doc.fontSize(11)
+           .font('Helvetica');
+
+        const yStart = doc.y;
+        
+        // Colonne de gauche
+        doc.text(`Statut: `, 50, yStart, { continued: true })
+           .font('Helvetica-Bold')
+           .text(trajet.statut);
+        
+        doc.font('Helvetica')
+           .text(`Lieu de départ: `, 50, doc.y, { continued: true })
+           .font('Helvetica-Bold')
+           .text(trajet.lieuDepart);
+        
+        doc.font('Helvetica')
+           .text(`Lieu d'arrivée: `, 50, doc.y, { continued: true })
+           .font('Helvetica-Bold')
+           .text(trajet.lieuArrivee);
+        
+        doc.font('Helvetica')
+           .text(`Date de départ: `, 50, doc.y, { continued: true })
+           .font('Helvetica-Bold')
+           .text(new Date(trajet.dateDepart).toLocaleString('fr-FR'));
+
+        if (trajet.dateArrivee) {
+            doc.font('Helvetica')
+               .text(`Date d'arrivée: `, 50, doc.y, { continued: true })
+               .font('Helvetica-Bold')
+               .text(new Date(trajet.dateArrivee).toLocaleString('fr-FR'));
+        }
+
+        doc.moveDown(1.5);
+
+        // Kilométrage
+        doc.fontSize(14)
+           .font('Helvetica-Bold')
+           .text('KILOMÉTRAGE', { underline: true })
+           .moveDown(0.5);
+
+        doc.fontSize(11)
+           .font('Helvetica')
+           .text(`Kilométrage de départ: `, 50, doc.y, { continued: true })
+           .font('Helvetica-Bold')
+           .text(`${trajet.kilometrageDepart} km`);
+
+        if (trajet.kilometrageArrivee) {
+            doc.font('Helvetica')
+               .text(`Kilométrage d'arrivée: `, 50, doc.y, { continued: true })
+               .font('Helvetica-Bold')
+               .text(`${trajet.kilometrageArrivee} km`);
+
+            const distance = trajet.kilometrageArrivee - trajet.kilometrageDepart;
+            doc.font('Helvetica')
+               .text(`Distance parcourue: `, 50, doc.y, { continued: true })
+               .font('Helvetica-Bold')
+               .text(`${distance} km`);
+        }
+
+        doc.moveDown(1.5);
+
+        // Informations du chauffeur
+        doc.fontSize(14)
+           .font('Helvetica-Bold')
+           .text('CHAUFFEUR', { underline: true })
+           .moveDown(0.5);
+
+        doc.fontSize(11)
+           .font('Helvetica')
+           .text(`Nom: `, 50, doc.y, { continued: true })
+           .font('Helvetica-Bold')
+           .text(trajet.chauffeur.fullName);
+
+        doc.font('Helvetica')
+           .text(`Email: `, 50, doc.y, { continued: true })
+           .font('Helvetica-Bold')
+           .text(trajet.chauffeur.email);
+
+        if (trajet.chauffeur.telephone) {
+            doc.font('Helvetica')
+               .text(`Téléphone: `, 50, doc.y, { continued: true })
+               .font('Helvetica-Bold')
+               .text(trajet.chauffeur.telephone);
+        }
+
+        doc.moveDown(1.5);
+
+        // Informations du véhicule
+        doc.fontSize(14)
+           .font('Helvetica-Bold')
+           .text('VÉHICULES', { underline: true })
+           .moveDown(0.5);
+
+        doc.fontSize(11)
+           .font('Helvetica')
+           .text('Camion:', { underline: true })
+           .moveDown(0.3);
+
+        doc.text(`  Matricule: `, 50, doc.y, { continued: true })
+           .font('Helvetica-Bold')
+           .text(trajet.camion.matricule);
+
+        doc.font('Helvetica')
+           .text(`  Marque/Modèle: `, 50, doc.y, { continued: true })
+           .font('Helvetica-Bold')
+           .text(`${trajet.camion.marque} ${trajet.camion.modele}`);
+
+        if (trajet.remorque) {
+            doc.moveDown(0.5);
+            doc.font('Helvetica')
+               .text('Remorque:', { underline: true })
+               .moveDown(0.3);
+
+            doc.text(`  Matricule: `, 50, doc.y, { continued: true })
+               .font('Helvetica-Bold')
+               .text(trajet.remorque.matricule);
+
+            doc.font('Helvetica')
+               .text(`  Type: `, 50, doc.y, { continued: true })
+               .font('Helvetica-Bold')
+               .text(trajet.remorque.type);
+
+            if (trajet.remorque.capacite) {
+                doc.font('Helvetica')
+                   .text(`  Capacité: `, 50, doc.y, { continued: true })
+                   .font('Helvetica-Bold')
+                   .text(`${trajet.remorque.capacite} tonnes`);
+            }
+        }
+
+        // Volume de gasoil restant
+        if (trajet.volumeGasoilRestant !== undefined && trajet.volumeGasoilRestant !== null) {
+            doc.moveDown(1.5);
+            doc.fontSize(14)
+               .font('Helvetica-Bold')
+               .text('CARBURANT', { underline: true })
+               .moveDown(0.5);
+
+            doc.fontSize(11)
+               .font('Helvetica')
+               .text(`Volume de gasoil restant: `, 50, doc.y, { continued: true })
+               .font('Helvetica-Bold')
+               .text(`${trajet.volumeGasoilRestant} L`);
+        }
+
+        // Remarques
+        if (trajet.remarques) {
+            doc.moveDown(1.5);
+            doc.fontSize(14)
+               .font('Helvetica-Bold')
+               .text('REMARQUES', { underline: true })
+               .moveDown(0.5);
+
+            doc.fontSize(11)
+               .font('Helvetica')
+               .text(trajet.remarques, {
+                   width: 500,
+                   align: 'justify'
+               });
+        }
+
+        // Pied de page
+        doc.moveDown(2);
+        doc.fontSize(9)
+           .font('Helvetica-Oblique')
+           .text('---', { align: 'center' })
+           .text('Ce document a été généré automatiquement par le système Navix', { align: 'center' })
+           .text(`ID du trajet: ${trajet._id}`, { align: 'center' });
+
+        return doc;
+    } catch(err) {
+        throw new Error(err.message);
+    }
+}

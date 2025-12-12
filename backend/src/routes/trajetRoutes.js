@@ -6,13 +6,12 @@ import {
     GetTrajetById,
     UpdateTrajet,
     DeleteTrajet,
-    DemarrerTrajet,
-    TerminerTrajet,
     GetTrajetsEnCours,
     GetTrajetsByChauffeur,
     UpdateStatutTrajet,
     ValiderFinTrajet,
-    GetMesTrajets
+    GetMesTrajets,
+    TelechargerTrajetPDF
 } from "../contollers/trajetController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 import { requireAdmin } from "../middlewares/roleMiddleware.js";
@@ -34,9 +33,7 @@ route.delete('/delete/:id', authenticate, requireAdmin, DeleteTrajet);
 // Routes Chauffeur
 route.put('/chauffeur/:id/statut', authenticate, UpdateStatutTrajet);
 route.post('/chauffeur/:id/valider', authenticate, ValiderFinTrajet);
+route.get('/chauffeur/:id/pdf', authenticate, TelechargerTrajetPDF);
 
-// Actions spéciales (anciennes routes)
-route.patch('/:id/demarrer', authenticate, DemarrerTrajet);
-route.patch('/:id/terminer', authenticate, TerminerTrajet);
 
 export default route;

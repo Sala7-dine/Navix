@@ -43,10 +43,6 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    isDelete: {
-      type: Boolean,
-      default: false,
-    },
     status : {
       type : Boolean,
       default : false

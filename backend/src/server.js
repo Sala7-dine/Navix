@@ -48,13 +48,13 @@ app.use('/images', (req, res, next) => {
 // Routes publiques
 app.use('/api/auth', authRoutes);
 // Routes protégées par authentification
-app.use('/api/users', userRoutes);
-app.use('/api/trajets', trajetRoutes);
-app.use('/api/camions', camionRoutes);
-app.use('/api/remorques', remorqueRoutes);
-app.use('/api/pneus', pneuRoutes);
-app.use('/api/maintenances', maintenanceRoutes);
-app.use('/api/fuel-logs', fuelLogRoutes);
+app.use('/api/users', authenticate , requireAdmin , userRoutes);
+app.use('/api/trajets', authenticate  , trajetRoutes);
+app.use('/api/camions', authenticate  ,  camionRoutes);
+app.use('/api/remorques', authenticate  , remorqueRoutes);
+app.use('/api/pneus', authenticate , requireAdmin  , pneuRoutes);
+app.use('/api/maintenances', authenticate , requireAdmin  ,maintenanceRoutes);
+app.use('/api/fuel-logs', authenticate  , fuelLogRoutes);
 
 app.use(notFound);
 

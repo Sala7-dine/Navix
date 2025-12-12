@@ -4,12 +4,11 @@ import {
     getTrajetById,
     updateTrajet,
     deleteTrajet,
-    demarrerTrajet,
-    terminerTrajet,
     getTrajetsEnCours,
     getTrajetsByChauffeur,
     updateStatutTrajet,
-    validerFinTrajet
+    validerFinTrajet,
+    genererPDFTrajet
 } from "../services/trajetSerevice.js";
 
 export const CreateTrajet = async (req, res) => {
@@ -106,42 +105,6 @@ export const DeleteTrajet = async (req, res) => {
     }
 }
 
-export const DemarrerTrajet = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const trajet = await demarrerTrajet(id);
-
-        res.status(200).json({
-            success: true,
-            message: 'Trajet démarré avec succès',
-            data: trajet
-        });
-    } catch(err) {
-        res.status(400).json({
-            success: false,
-            message: err.message
-        });
-    }
-}
-
-export const TerminerTrajet = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const trajet = await terminerTrajet(id, req.body);
-
-        res.status(200).json({
-            success: true,
-            message: 'Trajet terminé avec succès',
-            data: trajet
-        });
-    } catch(err) {
-        res.status(400).json({
-            success: false,
-            message: err.message
-        });
-    }
-}
-
 export const GetTrajetsEnCours = async (req, res) => {
     try {
         const trajets = await getTrajetsEnCours();
@@ -177,49 +140,14 @@ export const GetTrajetsByChauffeur = async (req, res) => {
     }
 }
 
-// ============ NOUVEAUX CONTROLLERS ============
 
-/**
- * ADMIN: Créer un trajet et l'assigner à un chauffeur
- * POST /api/trajets/admin/assigner
- * Body: { camion, remorque, destination, pointDepart, dateDepart, chauffeurId, ... }
- */
-export const AssignerTrajet = async (req, res) => {
-    try {
-        const { chauffeurId, ...trajetData } = req.body;
-        
-        if (!chauffeurId) {
-            return res.status(400).json({
-                success: false,
-                message: 'L\'ID du chauffeur est requis'
-            });
-        }
+/* CHAUFFEUR: Mettre à jour le statut du trajet */
 
-        const trajet = await assignerTrajetAChauffeur(trajetData, chauffeurId);
-
-        res.status(201).json({
-            success: true,
-            message: 'Trajet créé et assigné au chauffeur avec succès',
-            data: trajet
-        });
-    } catch(err) {
-        res.status(400).json({
-            success: false,
-            message: err.message
-        });
-    }
-}
-
-/**
- * CHAUFFEUR: Mettre à jour le statut du trajet
- * PUT /api/trajets/chauffeur/:id/statut
- * Body: { statut: 'EN_COURS' | 'TERMINE', kilometrageArrivee?, dateArrivee? }
- */
 export const UpdateStatutTrajet = async (req, res) => {
     try {
         const { id } = req.params;
         const { statut, ...data } = req.body;
-        const chauffeurId = req.user._id; // Récupéré depuis le middleware d'authentification
+        const chauffeurId = req.user._id; 
 
         if (!statut) {
             return res.status(400).json({
@@ -243,11 +171,8 @@ export const UpdateStatutTrajet = async (req, res) => {
     }
 }
 
-/**
- * CHAUFFEUR: Valider kilométrage arrivée et volume gasoil
- * POST /api/trajets/chauffeur/:id/valider
- * Body: { kilometrageArrivee: number, volumeGasoilRestant?: number }
- */
+/* CHAUFFEUR: Valider kilométrage arrivée et volume gasoil */
+
 export const ValiderFinTrajet = async (req, res) => {
     try {
         const { id } = req.params;
@@ -282,13 +207,11 @@ export const ValiderFinTrajet = async (req, res) => {
     }
 }
 
-/**
- * CHAUFFEUR: Obtenir mes trajets
- * GET /api/trajets/chauffeur/mes-trajets
- */
+/* CHAUFFEUR: Obtenir mes trajets */
+
 export const GetMesTrajets = async (req, res) => {
     try {
-        const chauffeurId = req.user._id; // Récupéré depuis le middleware d'authentification
+        const chauffeurId = req.user._id; 
         const { statut } = req.query;
         
         const filters = { chauffeur: chauffeurId };
@@ -301,6 +224,30 @@ export const GetMesTrajets = async (req, res) => {
             count: trajets.length,
             data: trajets
         });
+    } catch(err) {
+        res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+}
+
+/* Télécharger le trajet en PDF */ 
+
+export const TelechargerTrajetPDF = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const chauffeurId = req.user._id;
+
+        const pdfDoc = await genererPDFTrajet(id, chauffeurId);
+
+        // Définir les en-têtes HTTP pour le téléchargement du fichier
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=trajet_${id}.pdf`);
+
+        // Écrire le PDF dans la réponse
+        pdfDoc.pipe(res);
+        pdfDoc.end();
     } catch(err) {
         res.status(400).json({
             success: false,
