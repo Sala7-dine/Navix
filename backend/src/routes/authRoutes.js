@@ -5,14 +5,16 @@ import {
   refresh,
   logout,
 } from '../contollers/authController.js';
+import { validate } from '../middlewares/validate.js';
+import { loginSchema, registerSchema, refreshTokenSchema } from '../validations/auth.validation.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
-router.post('/refresh', refresh);
+router.post('/register', validate(registerSchema), register);
+router.post('/login', validate(loginSchema), login);
+router.post('/refresh', validate(refreshTokenSchema), refresh);
 
 router.post('/logout', logout);
 

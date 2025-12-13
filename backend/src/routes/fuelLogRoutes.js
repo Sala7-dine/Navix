@@ -13,6 +13,8 @@ import {
 } from "../contollers/fuelLogController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 import { requireAdmin } from "../middlewares/roleMiddleware.js";
+import { validate } from "../middlewares/validate.js";
+import { createFuelLogSchema, updateFuelLogSchema } from "../validations/fuelLog.validation.js";
 
 const route = express.Router();
 
@@ -25,8 +27,8 @@ route.get('/', authenticate, GetAllFuelLogs);
 route.get('/:id', authenticate, GetFuelLogById);
 
 // Routes protégées - Admin et Chauffeur
-route.post('/', authenticate, CreateFuelLog);
-route.put('/:id', authenticate, requireAdmin, UpdateFuelLog);
+route.post('/', authenticate, validate(createFuelLogSchema), CreateFuelLog);
+route.put('/:id', authenticate, requireAdmin, validate(updateFuelLogSchema), UpdateFuelLog);
 route.delete('/:id', authenticate, requireAdmin, DeleteFuelLog);
 
 export default route;

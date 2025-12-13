@@ -15,6 +15,8 @@ import {
 } from "../contollers/maintenanceController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 import { requireAdmin } from "../middlewares/roleMiddleware.js";
+import { validate } from "../middlewares/validate.js";
+import { createMaintenanceSchema, updateMaintenanceSchema } from "../validations/maintenance.validation.js";
 
 const route = express.Router();
 
@@ -27,8 +29,8 @@ route.get('/', authenticate, GetAllMaintenances);
 route.get('/:id', authenticate, GetMaintenanceById);
 
 // Routes protégées - Admin seulement
-route.post('/', authenticate, requireAdmin, CreateMaintenance);
-route.put('/:id', authenticate, requireAdmin, UpdateMaintenance);
+route.post('/', authenticate, requireAdmin, validate(createMaintenanceSchema), CreateMaintenance);
+route.put('/:id', authenticate, requireAdmin, validate(updateMaintenanceSchema), UpdateMaintenance);
 route.delete('/:id', authenticate, requireAdmin, DeleteMaintenance);
 
 // Actions spéciales

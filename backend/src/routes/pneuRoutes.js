@@ -12,6 +12,8 @@ import {
 } from "../contollers/pneuController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 import { requireAdmin } from "../middlewares/roleMiddleware.js";
+import { validate } from "../middlewares/validate.js";
+import { createPneuSchema, updatePneuSchema } from "../validations/pneu.validation.js";
 
 const route = express.Router();
 
@@ -22,8 +24,8 @@ route.get('/', authenticate, GetAllPneus);
 route.get('/:id', authenticate, GetPneuById);
 
 // Routes protégées - Admin seulement
-route.post('/', authenticate, requireAdmin, CreatePneu);
-route.put('/:id', authenticate, requireAdmin, UpdatePneu);
+route.post('/', authenticate, requireAdmin, validate(createPneuSchema), CreatePneu);
+route.put('/:id', authenticate, requireAdmin, validate(updatePneuSchema), UpdatePneu);
 route.patch('/:id/usure', authenticate, requireAdmin, UpdateUsurePneu);
 route.delete('/:id', authenticate, requireAdmin, DeletePneu);
 

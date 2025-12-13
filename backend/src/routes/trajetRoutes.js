@@ -15,6 +15,13 @@ import {
 } from "../contollers/trajetController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 import { requireAdmin } from "../middlewares/roleMiddleware.js";
+import { validate } from "../middlewares/validate.js";
+import { 
+    createTrajetSchema, 
+    updateTrajetSchema,
+    updateStatutTrajetSchema,
+    validerFinTrajetSchema
+} from "../validations/trajet.validation.js";
 
 const route = express.Router();
 
@@ -26,13 +33,13 @@ route.get('/', authenticate, GetAllTrajets);
 route.get('/:id', authenticate, GetTrajetById);
 
 // Routes Admin
-route.post('/create', authenticate, requireAdmin, CreateTrajet);
-route.put('/update/:id', authenticate, requireAdmin, UpdateTrajet);
+route.post('/create', authenticate, requireAdmin, validate(createTrajetSchema), CreateTrajet);
+route.put('/update/:id', authenticate, requireAdmin, validate(updateTrajetSchema), UpdateTrajet);
 route.delete('/delete/:id', authenticate, requireAdmin, DeleteTrajet);
 
 // Routes Chauffeur
-route.put('/chauffeur/:id/statut', authenticate, UpdateStatutTrajet);
-route.post('/chauffeur/:id/valider', authenticate, ValiderFinTrajet);
+route.put('/chauffeur/:id/statut', authenticate, validate(updateStatutTrajetSchema), UpdateStatutTrajet);
+route.post('/chauffeur/:id/valider', authenticate, validate(validerFinTrajetSchema), ValiderFinTrajet);
 route.get('/chauffeur/:id/pdf', authenticate, TelechargerTrajetPDF);
 
 
