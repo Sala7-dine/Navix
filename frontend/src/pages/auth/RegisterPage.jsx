@@ -1,8 +1,88 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import camionBg from '../../assets/images/camion-bg.jpg';
+import { register, clearError } from '../../features/auth/authSlice';
 import './RegisterPage.css';
 
 const RegisterPage = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { loading, error, isAuthenticated, user } = useSelector((state) => state.auth);
+    
+    const [formData, setFormData] = useState({
+        fullName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        telephone: '',
+        acceptTerms: false
+    });
+    const [validationError, setValidationError] = useState('');
+
+    useEffect(() => {
+        // Redirect if already authenticated
+        if (isAuthenticated && user) {
+            if (user.role === 'admin') {
+                navigate('/admin/dashboard');
+            } else if (user.role === 'chauffeur') {
+                navigate('/chauffeur/dashboard');
+            }
+        }
+    }, [isAuthenticated, user, navigate]);
+
+    useEffect(() => {
+        // Clear error on unmount
+        return () => {
+            dispatch(clearError());
+        };
+    }, [dispatch]);
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+        setValidationError('');
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setValidationError('');
+
+        // Validation
+        if (formData.password !== formData.confirmPassword) {
+            setValidationError('Les mots de passe ne correspondent pas');
+            return;
+        }
+
+        if (!formData.acceptTerms) {
+            setValidationError('Vous devez accepter les termes et conditions');
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            setValidationError('Le mot de passe doit contenir au moins 6 caractères');
+            return;
+        }
+
+        try {
+            const { confirmPassword, acceptTerms, ...registerData } = formData;
+            const result = await dispatch(register(registerData)).unwrap();
+            
+            // Redirect based on user role
+            if (result.user.role === 'admin') {
+                navigate('/admin/dashboard');
+            } else if (result.user.role === 'chauffeur') {
+                navigate('/chauffeur/dashboard');
+            }
+        } catch (err) {
+            // Error is handled by Redux
+            console.error('Registration failed:', err);
+        }
+    };
+
     return (
         <div className="w-full h-screen flex overflow-hidden">
             
@@ -50,27 +130,34 @@ const RegisterPage = () => {
                         </p>
                     </div>
 
-                    <form className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <input 
-                                    type="text" 
-                                    className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
-                                    placeholder="First Name"
-                                />
-                            </div>
-                            <div>
-                                <input 
-                                    type="text" 
-                                    className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
-                                    placeholder="Last Name"
-                                />
-                            </div>
+                    {(error || validationError) && (
+                        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                            {validationError || error}
+                        </div>
+                    )}
+
+                    <form className="space-y-4" onSubmit={handleSubmit}>
+                        <div>
+                            <input 
+                                type="text"
+                                name="fullName"
+                                value={formData.fullName}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
+                                className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
+                                placeholder="Full Name"
+                            />
                         </div>
 
                         <div>
                             <input 
-                                type="email" 
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
                                 className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
                                 placeholder="Email ID"
                             />
@@ -78,7 +165,26 @@ const RegisterPage = () => {
 
                         <div>
                             <input 
-                                type="password" 
+                                type="tel"
+                                name="telephone"
+                                value={formData.telephone}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
+                                className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
+                                placeholder="Telephone"
+                            />
+                        </div>
+
+                        <div>
+                            <input 
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
+                                minLength="6"
                                 className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
                                 placeholder="Password"
                             />
@@ -86,7 +192,13 @@ const RegisterPage = () => {
 
                         <div>
                             <input 
-                                type="password" 
+                                type="password"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
+                                minLength="6"
                                 className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
                                 placeholder="Confirm Password"
                             />
@@ -95,7 +207,11 @@ const RegisterPage = () => {
                         <div className="flex items-center justify-between text-xs">
                             <label className="flex items-center text-gray-600 cursor-pointer">
                                 <input 
-                                    type="checkbox" 
+                                    type="checkbox"
+                                    name="acceptTerms"
+                                    checked={formData.acceptTerms}
+                                    onChange={handleChange}
+                                    disabled={loading}
                                     className="w-4 h-4 rounded text-brand-pink focus:ring-brand-pink border-gray-300"
                                 />
                                 <span className="ml-2">Accept terms & conditions</span>
@@ -106,13 +222,14 @@ const RegisterPage = () => {
                         </div>
 
                         <button 
-                            type="submit" 
+                            type="submit"
+                            disabled={loading}
                             style={{
                                 background: 'linear-gradient(to right, #B721FF, #9333ea)'
                             }}
-                            className="w-full py-3 text-white font-semibold rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                            className="w-full py-3 text-white font-semibold rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            SUBSCRIBE
+                            {loading ? 'INSCRIPTION...' : 'REGISTER'}
                         </button>
                     </form>
                 </div>

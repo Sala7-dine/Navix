@@ -18,11 +18,12 @@ export const login = createAsyncThunk(
     try {
       const response = await authService.login(credentials);
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.accessToken);
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
       localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.user));
       return response;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Échec de la connexion');
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Échec de la connexion';
+      console.log('Extracted error message:', errorMessage);
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -33,11 +34,10 @@ export const register = createAsyncThunk(
     try {
       const response = await authService.register(userData);
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.accessToken);
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
       localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.user));
       return response;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Échec de l'inscription");
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || "Échec de l'inscription");
     }
   }
 );
@@ -46,11 +46,13 @@ export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValu
   try {
     await authService.logout();
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER_DATA);
     return null;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Échec de la déconnexion');
+    // Même si l'API échoue, on nettoie le localStorage
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Échec de la déconnexion');
   }
 });
 

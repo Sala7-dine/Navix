@@ -1,8 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import camionBg from '../../assets/images/camion-bg.jpg';
+import { login, clearError } from '../../features/auth/authSlice';
 import './LoginPage.css';
 
 const LoginPage = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { loading, error, isAuthenticated, user } = useSelector((state) => state.auth);
+    
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
+
+    useEffect(() => {
+        // Redirect if already authenticated
+        if (isAuthenticated && user) {
+            if (user.role === 'admin') {
+                navigate('/admin/dashboard');
+            } else if (user.role === 'chauffeur') {
+                navigate('/chauffeur/dashboard');
+            }
+        }
+    }, [isAuthenticated, user, navigate]);
+
+    useEffect(() => {
+        // Clear error on unmount
+        return () => {
+            dispatch(clearError());
+        };
+    }, [dispatch]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        try {
+            const result = await dispatch(login(formData)).unwrap();
+            
+            // Redirect based on user role
+            if (result.user.role === 'admin') {
+                navigate('/admin/dashboard');
+            } else if (result.user.role === 'chauffeur') {
+                navigate('/chauffeur/dashboard');
+            }
+        } catch (err) {
+            // Error is handled by Redux
+            console.error('Login failed:', err);
+        }
+    };
+
     return (
         <div className="w-full h-screen flex overflow-hidden">
             
@@ -50,10 +106,21 @@ const LoginPage = () => {
                         </p>
                     </div>
 
-                    <form className="space-y-5">
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                            {error}
+                        </div>
+                    )}
+
+                    <form className="space-y-5" onSubmit={handleSubmit}>
                         <div>
                             <input 
-                                type="email" 
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
                                 className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
                                 placeholder="Email ID"
                             />
@@ -61,7 +128,12 @@ const LoginPage = () => {
 
                         <div>
                             <input 
-                                type="password" 
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
                                 className="input-field w-full px-4 py-3 rounded-lg text-gray-700 text-sm" 
                                 placeholder="Password"
                             />
@@ -70,24 +142,25 @@ const LoginPage = () => {
                         <div className="flex items-center justify-between text-xs">
                             <label className="flex items-center text-gray-600 cursor-pointer">
                                 <input 
-                                    type="checkbox" 
+                                    type="checkbox"
                                     className="w-4 h-4 rounded text-brand-pink focus:ring-brand-pink border-gray-300"
                                 />
                                 <span className="ml-2">Keep me signed in</span>
                             </label>
                             <a href="/register" className="text-brand-pink hover:underline font-medium">
-                                Already a member?
+                                Create account?
                             </a>
                         </div>
 
                         <button 
-                            type="submit" 
+                            type="submit"
+                            disabled={loading}
                             style={{
                                 background: 'linear-gradient(to right, #B721FF, #9333ea)'
                             }}
-                            className="w-full py-3 text-white font-semibold rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                            className="w-full py-3 text-white font-semibold rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            SUBSCRIBE
+                            {loading ? 'CONNEXION...' : 'LOGIN'}
                         </button>
                     </form>
                 </div>

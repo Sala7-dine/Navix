@@ -9,6 +9,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Important: envoie les cookies avec les requêtes
 });
 
 // Request interceptor - Add auth token
@@ -38,23 +39,20 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-        if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
-          });
+        // Le refreshToken est envoyé automatiquement via le cookie
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
+          withCredentials: true,
+        });
 
-          const { accessToken } = response.data;
-          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
+        const { accessToken } = response.data;
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
 
-          // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return apiClient(originalRequest);
-        }
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return apiClient(originalRequest);
       } catch (refreshError) {
         // Refresh failed, logout user
         localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
         localStorage.removeItem(STORAGE_KEYS.USER_DATA);
         window.location.href = '/login';
         return Promise.reject(refreshError);
