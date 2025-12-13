@@ -1,0 +1,63 @@
+.admin-dashboard {
+    background-color: #1e1a42;
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Custom Scrollbar */
+.admin-dashboard ::-webkit-scrollbar {
+    width: 6px;
+}
+.admin-dashboard ::-webkit-scrollbar-track {
+    background: #0d0b21;
+}
+.admin-dashboard ::-webkit-scrollbar-thumb {
+    background: #2d2b45;
+    border-radius: 3px;
+}
+.admin-dashboard ::-webkit-scrollbar-thumb:hover {
+    background: #3d3b55;
+}
+
+.sidebar-bg {
+    background-color: #221e4a;
+}
+
+.dashboard-main {
+    background-color: #1e1a42;
+}
+
+.glass-card {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cyan-card {
+    background: linear-gradient(135deg, #21D4FD 0%, #0B98C5 100%);
+}
+
+.sidebar-link {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.sidebar-link.active {
+    color: #21D4FD;
+}
+
+.sidebar-link.active::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: #21D4FD;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 0 10px #21D4FD;
+}
+
+.text-dark-muted {
+    color: #6c6a7d;
+}
