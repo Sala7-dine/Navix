@@ -1,3 +1,17 @@
+# ---- Development stage ----
+FROM node:20-alpine as development
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+
 # ---- Build stage ----
 FROM node:20-alpine as build
 
@@ -10,7 +24,7 @@ COPY . .
 RUN npm run build
 
 # ---- Serve stage ----
-FROM nginx:alpine
+FROM nginx:alpine as production
 
 # Copy build to nginx
 COPY --from=build /app/build /usr/share/nginx/html 

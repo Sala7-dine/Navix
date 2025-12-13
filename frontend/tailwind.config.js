@@ -7,6 +7,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          cyan: '#21D4FD',
+          pink: '#B721FF'
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

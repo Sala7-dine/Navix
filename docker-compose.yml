@@ -17,11 +17,21 @@ services:
       - fleetnet
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      target: development
     container_name: fleet_frontend
     restart: always
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     ports:
-      - "3002:80"
+      - "3002:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/package.json:/app/package.json
+      - /app/node_modules
     depends_on:
       - backend
     networks:
