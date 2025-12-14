@@ -69,6 +69,30 @@ export const deleteMaintenance = createAsyncThunk(
   }
 );
 
+export const demarrerMaintenance = createAsyncThunk(
+  'maintenances/demarrer',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await maintenancesService.demarrer(id);
+      return response.data || response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Erreur lors du démarrage');
+    }
+  }
+);
+
+export const terminerMaintenance = createAsyncThunk(
+  'maintenances/terminer',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await maintenancesService.terminer(id);
+      return response.data || response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Erreur lors de la finalisation');
+    }
+  }
+);
+
 // Slice
 const maintenancesSlice = createSlice({
   name: 'maintenances',
@@ -118,6 +142,42 @@ const maintenancesSlice = createSlice({
       })
       .addCase(deleteMaintenance.fulfilled, (state, action) => {
         state.maintenances = state.maintenances.filter((m) => m._id !== action.payload);
+      })
+      .addCase(demarrerMaintenance.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(demarrerMaintenance.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.maintenances.findIndex((m) => m._id === action.payload._id);
+        if (index !== -1) {
+          state.maintenances[index] = action.payload;
+        }
+        if (state.currentMaintenance?._id === action.payload._id) {
+          state.currentMaintenance = action.payload;
+        }
+      })
+      .addCase(demarrerMaintenance.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(terminerMaintenance.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(terminerMaintenance.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.maintenances.findIndex((m) => m._id === action.payload._id);
+        if (index !== -1) {
+          state.maintenances[index] = action.payload;
+        }
+        if (state.currentMaintenance?._id === action.payload._id) {
+          state.currentMaintenance = action.payload;
+        }
+      })
+      .addCase(terminerMaintenance.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

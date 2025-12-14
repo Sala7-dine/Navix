@@ -53,7 +53,6 @@ export const createMaintenanceSchema = yup.object({
     .default(0),
   date: yup
     .date()
-    .max(new Date(), 'La date ne peut pas être dans le futur')
     .default(() => new Date()),
   statut: yup
     .string()

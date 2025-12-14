@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMaintenances, createMaintenance, updateMaintenance, deleteMaintenance } from '../../../features/maintenances/maintenancesSlice';
+import { fetchMaintenances, createMaintenance, updateMaintenance, deleteMaintenance, demarrerMaintenance, terminerMaintenance } from '../../../features/maintenances/maintenancesSlice';
 import { fetchCamions } from '../../../features/camions/camionsSlice';
 import { fetchPneus } from '../../../features/pneus/pneusSlice';
 import MaintenanceModal from '../../../components/modals/MaintenanceModal';
@@ -105,6 +105,24 @@ const Maintenances = () => {
             setMaintenanceToDelete(null);
         } catch (err) {
             showNotification(err || 'Erreur lors de la suppression', 'error');
+        }
+    };
+
+    const handleDemarrer = async (maintenanceId) => {
+        try {
+            await dispatch(demarrerMaintenance(maintenanceId)).unwrap();
+            showNotification('Maintenance démarrée avec succès');
+        } catch (err) {
+            showNotification(err || 'Erreur lors du démarrage', 'error');
+        }
+    };
+
+    const handleTerminer = async (maintenanceId) => {
+        try {
+            await dispatch(terminerMaintenance(maintenanceId)).unwrap();
+            showNotification('Maintenance terminée avec succès');
+        } catch (err) {
+            showNotification(err || 'Erreur lors de la finalisation', 'error');
         }
     };
 
@@ -268,6 +286,29 @@ const Maintenances = () => {
                                         </td>
                                         <td className="py-4 px-4">
                                             <div className="flex gap-2">
+                                                {maintenance.statut === 'PLANIFIEE' && (
+                                                    <button 
+                                                        onClick={() => handleDemarrer(maintenance._id)}
+                                                        className="p-2 hover:bg-green-500/20 rounded-lg transition-colors group"
+                                                        title="Démarrer"
+                                                    >
+                                                        <svg className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                                {maintenance.statut === 'EN_COURS' && (
+                                                    <button 
+                                                        onClick={() => handleTerminer(maintenance._id)}
+                                                        className="p-2 hover:bg-blue-500/20 rounded-lg transition-colors group"
+                                                        title="Terminer"
+                                                    >
+                                                        <svg className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </button>
+                                                )}
                                                 <button 
                                                     onClick={() => handleEdit(maintenance)}
                                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"

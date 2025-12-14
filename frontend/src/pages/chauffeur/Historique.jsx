@@ -1,19 +1,19 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTrajets } from '../../features/trajets/trajetsSlice';
+import { fetchMesTrajets } from '../../features/trajets/trajetsSlice';
 
 const Historique = () => {
     const dispatch = useDispatch();
     const { trajets, loading } = useSelector((state) => state.trajets);
     const { user } = useSelector((state) => state.auth);
 
-    // Filtrer les trajets terminés du chauffeur connecté
+    // Filtrer uniquement les trajets terminés (fetchMesTrajets retourne déjà les trajets du chauffeur connecté)
     const trajetsTermines = trajets.filter(
-        trajet => trajet.chauffeur?._id === user?.userId && trajet.statut === 'TERMINE'
+        trajet => trajet.statut === 'TERMINE'
     );
 
     useEffect(() => {
-        dispatch(fetchTrajets());
+        dispatch(fetchMesTrajets());
     }, [dispatch]);
 
     // Calculer les statistiques
