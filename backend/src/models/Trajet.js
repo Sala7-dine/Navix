@@ -7,7 +7,7 @@ const trajetSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'Le chauffeur est requis'],
     },
-
+    
     camion: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Camion',
