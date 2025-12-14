@@ -69,6 +69,34 @@ export const deleteTrajet = createAsyncThunk(
   }
 );
 
+export const updateStatutTrajet = createAsyncThunk(
+  'trajets/updateStatut',
+  async ({ id, statut, kilometrageArrivee }, { rejectWithValue }) => {
+    try {
+      const data = { statut };
+      if (kilometrageArrivee) {
+        data.kilometrageArrivee = kilometrageArrivee;
+      }
+      const response = await trajetsService.updateStatut(id, data);
+      return response.data || response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Erreur lors de la mise à jour du statut');
+    }
+  }
+);
+
+export const fetchMesTrajets = createAsyncThunk(
+  'trajets/fetchMesTrajets',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await trajetsService.getMesTrajets();
+      return response.data || response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Erreur lors du chargement');
+    }
+  }
+);
+
 // Slice
 const trajetsSlice = createSlice({
   name: 'trajets',
@@ -149,6 +177,36 @@ const trajetsSlice = createSlice({
         }
       })
       .addCase(deleteTrajet.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateStatutTrajet.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateStatutTrajet.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.trajets.findIndex((t) => t._id === action.payload._id);
+        if (index !== -1) {
+          state.trajets[index] = action.payload;
+        }
+        if (state.currentTrajet?._id === action.payload._id) {
+          state.currentTrajet = action.payload;
+        }
+      })
+      .addCase(updateStatutTrajet.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchMesTrajets.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMesTrajets.fulfilled, (state, action) => {
+        state.loading = false;
+        state.trajets = action.payload;
+      })
+      .addCase(fetchMesTrajets.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

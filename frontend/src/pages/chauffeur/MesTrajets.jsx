@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTrajets } from '../../features/trajets/trajetsSlice';
+import { fetchMesTrajets, updateStatutTrajet } from '../../features/trajets/trajetsSlice';
 
 const MesTrajets = () => {
     const dispatch = useDispatch();
     const { trajets, loading } = useSelector((state) => state.trajets);
     const { user } = useSelector((state) => state.auth);
     const [notification, setNotification] = useState(null);
+    const [updating, setUpdating] = useState(null);
+    const [showFinishModal, setShowFinishModal] = useState(false);
+    const [selectedTrajet, setSelectedTrajet] = useState(null);
+    const [kilometrageArrivee, setKilometrageArrivee] = useState('');
 
-    // Filtrer les trajets du chauffeur connecté
-    const mesTrajets = trajets.filter(trajet => trajet.chauffeur?._id === user?.userId);
+    // Les trajets sont déjà filtrés par le backend pour le chauffeur connecté
+    const mesTrajets = trajets;
 
     useEffect(() => {
-        dispatch(fetchTrajets());
+        dispatch(fetchMesTrajets());
     }, [dispatch]);
 
     const showNotification = (message, type = 'success') => {
@@ -20,9 +24,55 @@ const MesTrajets = () => {
         setTimeout(() => setNotification(null), 3000);
     };
 
-    const handleUpdateStatus = (trajetId, newStatus) => {
-        // TODO: Implémenter l'API pour mettre à jour le statut
-        showNotification(`Statut du trajet mis à jour: ${newStatus}`);
+    const handleUpdateStatus = async (trajetId, newStatus) => {
+        try {
+            setUpdating(trajetId);
+            await dispatch(updateStatutTrajet({ 
+                id: trajetId, 
+                statut: newStatus 
+            })).unwrap();
+            
+            showNotification(
+                newStatus === 'EN_COURS' 
+                    ? 'Trajet démarré avec succès !' 
+                    : 'Trajet terminé avec succès !',
+                'success'
+            );
+        } catch (error) {
+            showNotification(error || 'Erreur lors de la mise à jour', 'error');
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    const handleFinishClick = (trajet) => {
+        setSelectedTrajet(trajet);
+        setKilometrageArrivee('');
+        setShowFinishModal(true);
+    };
+
+    const handleFinishTrajet = async () => {
+        if (!kilometrageArrivee || kilometrageArrivee <= selectedTrajet.kilometrageDepart) {
+            showNotification('Le kilométrage d\'arrivée doit être supérieur au kilométrage de départ', 'error');
+            return;
+        }
+
+        try {
+            setUpdating(selectedTrajet._id);
+            await dispatch(updateStatutTrajet({ 
+                id: selectedTrajet._id, 
+                statut: 'TERMINE',
+                kilometrageArrivee: Number(kilometrageArrivee)
+            })).unwrap();
+            
+            showNotification('Trajet terminé avec succès !', 'success');
+            setShowFinishModal(false);
+            setSelectedTrajet(null);
+        } catch (error) {
+            showNotification(error || 'Erreur lors de la finalisation', 'error');
+        } finally {
+            setUpdating(null);
+        }
     };
 
     const getStatusColor = (statut) => {
@@ -71,9 +121,15 @@ const MesTrajets = () => {
                         : 'bg-red-500/20 border-red-500/30 text-red-400'
                 }`}>
                     <div className="flex items-center gap-3">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
-                        </svg>
+                        {notification.type === 'success' ? (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        )}
                         <span className="font-medium">{notification.message}</span>
                     </div>
                 </div>
@@ -210,17 +266,44 @@ const MesTrajets = () => {
                                                 {trajet.statut === 'PLANIFIE' && (
                                                     <button
                                                         onClick={() => handleUpdateStatus(trajet._id, 'EN_COURS')}
-                                                        className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors text-xs font-medium"
+                                                        disabled={updating === trajet._id}
+                                                        className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                                     >
-                                                        Démarrer
+                                                        {updating === trajet._id ? (
+                                                            <>
+                                                                <div className="w-3 h-3 border-2 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+                                                                <span>Démarrage...</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                                <span>Démarrer</span>
+                                                            </>
+                                                        )}
                                                     </button>
                                                 )}
                                                 {trajet.statut === 'EN_COURS' && (
                                                     <button
-                                                        onClick={() => handleUpdateStatus(trajet._id, 'TERMINE')}
-                                                        className="px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors text-xs font-medium"
+                                                        onClick={() => handleFinishClick(trajet)}
+                                                        disabled={updating === trajet._id}
+                                                        className="px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                                     >
-                                                        Terminer
+                                                        {updating === trajet._id ? (
+                                                            <>
+                                                                <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                                                                <span>En cours...</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                                <span>Terminer</span>
+                                                            </>
+                                                        )}
                                                     </button>
                                                 )}
                                                 <button
@@ -241,6 +324,94 @@ const MesTrajets = () => {
                     </div>
                 )}
             </div>
+
+            {/* Modal pour terminer le trajet */}
+            {showFinishModal && selectedTrajet && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="glass-panel p-8 max-w-md w-full mx-4 rounded-2xl">
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2">Terminer le trajet</h3>
+                            <p className="text-dark-muted text-sm">
+                                {selectedTrajet.lieuDepart} → {selectedTrajet.lieuArrivee}
+                            </p>
+                        </div>
+
+                        <div className="space-y-4 mb-6">
+                            <div>
+                                <label className="block text-sm font-medium text-dark-muted mb-2">
+                                    Kilométrage de départ
+                                </label>
+                                <div className="glass-card p-3 rounded-lg">
+                                    <p className="text-white font-semibold">{selectedTrajet.kilometrageDepart} km</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-dark-muted mb-2">
+                                    Kilométrage d'arrivée <span className="text-red-400">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    value={kilometrageArrivee}
+                                    onChange={(e) => setKilometrageArrivee(e.target.value)}
+                                    min={selectedTrajet.kilometrageDepart + 1}
+                                    placeholder="Entrez le kilométrage final"
+                                    className="w-full px-4 py-3 glass-card rounded-lg text-white placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                />
+                                {kilometrageArrivee && Number(kilometrageArrivee) <= selectedTrajet.kilometrageDepart && (
+                                    <p className="text-red-400 text-xs mt-1">
+                                        Le kilométrage doit être supérieur à {selectedTrajet.kilometrageDepart} km
+                                    </p>
+                                )}
+                            </div>
+
+                            {kilometrageArrivee && Number(kilometrageArrivee) > selectedTrajet.kilometrageDepart && (
+                                <div className="glass-card p-3 rounded-lg border border-brand-cyan/30">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-dark-muted">Distance parcourue</span>
+                                        <span className="text-brand-cyan font-semibold">
+                                            {Number(kilometrageArrivee) - selectedTrajet.kilometrageDepart} km
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowFinishModal(false);
+                                    setSelectedTrajet(null);
+                                    setKilometrageArrivee('');
+                                }}
+                                disabled={updating === selectedTrajet._id}
+                                className="flex-1 px-4 py-3 glass-card text-white rounded-xl font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={handleFinishTrajet}
+                                disabled={updating === selectedTrajet._id || !kilometrageArrivee || Number(kilometrageArrivee) <= selectedTrajet.kilometrageDepart}
+                                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {updating === selectedTrajet._id ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Finalisation...</span>
+                                    </>
+                                ) : (
+                                    'Terminer le trajet'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
