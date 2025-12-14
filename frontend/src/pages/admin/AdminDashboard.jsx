@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
 import Sidebar from '../../components/layout/Sidebar';
@@ -10,6 +10,11 @@ import Remorques from './remorques/Remorques';
 import Maintenances from './maintenances/Maintenances';
 import Users from './users/Users';
 import FuelLogs from './fuellogs/FuelLogs';
+import { fetchCamions } from '../../features/camions/camionsSlice';
+import { fetchTrajets } from '../../features/trajets/trajetsSlice';
+import { fetchMaintenances } from '../../features/maintenances/maintenancesSlice';
+import { fetchPneus } from '../../features/pneus/pneusSlice';
+import { fetchUsers } from '../../features/users/usersSlice';
 import {
     Chart,
     CategoryScale,
@@ -43,6 +48,46 @@ const AdminDashboard = () => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
+
+    // Redux selectors
+    const { camions } = useSelector((state) => state.camions);
+    const { trajets } = useSelector((state) => state.trajets);
+    const { maintenances } = useSelector((state) => state.maintenances);
+    const { pneus } = useSelector((state) => state.pneus);
+    const { users } = useSelector((state) => state.users);
+
+    // Fetch data
+    useEffect(() => {
+        dispatch(fetchCamions());
+        dispatch(fetchTrajets());
+        dispatch(fetchMaintenances());
+        dispatch(fetchPneus());
+        dispatch(fetchUsers());
+    }, [dispatch]);
+
+    // Calculate statistics
+    const totalCamions = camions.length;
+    const camionsDisponibles = camions.filter(c => c.statut === 'DISPONIBLE').length;
+    const camionsEnService = camions.filter(c => c.statut === 'EN_SERVICE').length;
+    const camionsEnMaintenance = camions.filter(c => c.statut === 'EN_MAINTENANCE').length;
+
+    const totalTrajets = trajets.length;
+    const trajetsEnCours = trajets.filter(t => t.statut === 'EN_COURS').length;
+    const trajetsPlanifies = trajets.filter(t => t.statut === 'PLANIFIE').length;
+    const trajetsTermines = trajets.filter(t => t.statut === 'TERMINE').length;
+
+    const totalMaintenances = maintenances.length;
+    const maintenancesEnCours = maintenances.filter(m => m.statut === 'EN_COURS').length;
+    const maintenancesPlanifiees = maintenances.filter(m => m.statut === 'PLANIFIEE').length;
+
+    const totalPneus = pneus.length;
+    const pneusBonEtat = pneus.filter(p => p.usurePourcentage < 40).length;
+    const pneusASurveiller = pneus.filter(p => p.usurePourcentage >= 40 && p.usurePourcentage < 70).length;
+    const pneusCritique = pneus.filter(p => p.usurePourcentage >= 70).length;
+
+    const totalUsers = users.length;
+    const chauffeurs = users.filter(u => u.role === 'CHAUFFEUR').length;
+    const admins = users.filter(u => u.role === 'ADMIN').length;
 
     useEffect(() => {
         if (chartRef.current) {
@@ -223,86 +268,152 @@ const AdminDashboard = () => {
                             <div>
                                 <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-4">Statistiques Flotte</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                    {/* Card 1 - Chauffeurs */}
+                                    {/* Card 1 - Camions */}
                                     <div className="cyan-card rounded-2xl p-6 flex items-center justify-between shadow-lg shadow-cyan-500/20 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
                                         <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0h-.01M15 17a2 2 0 104 0m-4 0h-.01"/>
+                                            </svg>
                                         </div>
                                         
                                         <div className="text-right z-10">
                                             <div className="flex items-baseline justify-end gap-2 mb-1">
-                                                <span className="text-2xl font-bold text-white">24</span>
-                                                <span className="text-xs font-medium text-white/80 uppercase">Chauffeurs</span>
+                                                <span className="text-2xl font-bold text-white">{totalCamions}</span>
+                                                <span className="text-xs font-medium text-white/80 uppercase">Camions</span>
                                             </div>
                                             <div className="flex items-center justify-end gap-2">
                                                 <svg className="w-12 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 10c5 0 8-5 12-5s7 10 12 10 8-8 12-8 8 5 10 5"/></svg>
                                                 <span className="text-xs font-bold text-white flex items-center bg-white/20 px-1.5 py-0.5 rounded backdrop-blur-sm">
                                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                                    12.5%
+                                                    {totalCamions > 0 ? Math.round((camionsDisponibles / totalCamions) * 100) : 0}%
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Card 2 - Véhicules */}
+                                    {/* Card 2 - Trajets */}
                                     <div className="glass-card rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group hover:bg-white/5 transition-all duration-300">
                                         <div className="w-12 h-12 rounded-full bg-[#2d2b45] flex items-center justify-center">
-                                            <svg className="w-6 h-6 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                            <svg className="w-6 h-6 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                            </svg>
                                         </div>
                                         
                                         <div className="text-right z-10">
                                             <div className="flex items-baseline justify-end gap-2 mb-1">
-                                                <span className="text-2xl font-bold text-white">18</span>
-                                                <span className="text-xs font-medium text-dark-muted uppercase">Véhicules</span>
-                                            </div>
-                                            <div className="flex items-center justify-end gap-2">
-                                                <svg className="w-12 h-5 text-brand-pink/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 15c5 0 8-10 12-10s7 15 12 15 8-12 12-12 8 8 10 8"/></svg>
-                                                <span className="text-xs font-bold text-red-400 flex items-center">
-                                                    <svg className="w-3 h-3 mr-1 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                                    2.4%
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Card 3 - Trajets */}
-                                    <div className="glass-card rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group hover:bg-white/5 transition-all duration-300">
-                                        <div className="w-12 h-12 rounded-full bg-[#2d2b45] flex items-center justify-center">
-                                            <svg className="w-6 h-6 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                        </div>
-                                        
-                                        <div className="text-right z-10">
-                                            <div className="flex items-baseline justify-end gap-2 mb-1">
-                                                <span className="text-2xl font-bold text-white">156</span>
+                                                <span className="text-2xl font-bold text-white">{totalTrajets}</span>
                                                 <span className="text-xs font-medium text-dark-muted uppercase">Trajets</span>
                                             </div>
                                             <div className="flex items-center justify-end gap-2">
                                                 <svg className="w-12 h-5 text-brand-pink/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 15c5 0 8-10 12-10s7 15 12 15 8-12 12-12 8 8 10 8"/></svg>
-                                                <span className="text-xs font-bold text-red-400 flex items-center">
-                                                    <svg className="w-3 h-3 mr-1 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                                    2.4%
+                                                <span className="text-xs font-bold text-green-400 flex items-center">
+                                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                                    {totalTrajets > 0 ? Math.round((trajetsEnCours / totalTrajets) * 100) : 0}%
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Card 4 - Heures */}
+                                    {/* Card 3 - Maintenances */}
                                     <div className="glass-card rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group hover:bg-white/5 transition-all duration-300">
                                         <div className="w-12 h-12 rounded-full bg-[#2d2b45] flex items-center justify-center">
-                                            <svg className="w-6 h-6 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <svg className="w-6 h-6 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
                                         </div>
                                         
                                         <div className="text-right z-10">
                                             <div className="flex items-baseline justify-end gap-2 mb-1">
-                                                <span className="text-2xl font-bold text-white">342h</span>
-                                                <span className="text-xs font-medium text-dark-muted uppercase">Heures</span>
+                                                <span className="text-2xl font-bold text-white">{totalMaintenances}</span>
+                                                <span className="text-xs font-medium text-dark-muted uppercase">Maintenances</span>
+                                            </div>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <svg className="w-12 h-5 text-brand-pink/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 10c5 0 8 5 12 5s7-8 12-8 8 6 12 6 8-4 10-4"/></svg>
+                                                <span className="text-xs font-bold text-orange-400 flex items-center">
+                                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01"/></svg>
+                                                    {totalMaintenances > 0 ? Math.round((maintenancesEnCours / totalMaintenances) * 100) : 0}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Card 4 - Pneus */}
+                                    <div className="glass-card rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group hover:bg-white/5 transition-all duration-300">
+                                        <div className="w-12 h-12 rounded-full bg-[#2d2b45] flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="9" strokeWidth="2"/>
+                                                <circle cx="12" cy="12" r="4" strokeWidth="2"/>
+                                            </svg>
+                                        </div>
+                                        
+                                        <div className="text-right z-10">
+                                            <div className="flex items-baseline justify-end gap-2 mb-1">
+                                                <span className="text-2xl font-bold text-white">{totalPneus}</span>
+                                                <span className="text-xs font-medium text-dark-muted uppercase">Pneus</span>
                                             </div>
                                             <div className="flex items-center justify-end gap-2">
                                                 <svg className="w-12 h-5 text-brand-cyan/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 12c5 0 8-8 12-8s7 12 12 12 8-10 12-10 8 6 10 6"/></svg>
                                                 <span className="text-xs font-bold text-brand-cyan flex items-center">
                                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                                    8.1%
+                                                    {totalPneus > 0 ? Math.round((pneusBonEtat / totalPneus) * 100) : 0}%
                                                 </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Additional Stats Row */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                    {/* Users Card */}
+                                    <div className="glass-panel rounded-2xl p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-white font-semibold">Utilisateurs</h3>
+                                            <div className="bg-blue-500/10 p-2 rounded-lg">
+                                                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-dark-muted text-sm">Total</span>
+                                                <span className="text-white font-bold text-xl">{totalUsers}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-dark-muted text-sm">Chauffeurs</span>
+                                                <span className="text-cyan-400 font-semibold">{chauffeurs}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-dark-muted text-sm">Administrateurs</span>
+                                                <span className="text-purple-400 font-semibold">{admins}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Fleet Health Card */}
+                                    <div className="glass-panel rounded-2xl p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-white font-semibold">État de la Flotte</h3>
+                                            <div className="bg-green-500/10 p-2 rounded-lg">
+                                                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-dark-muted text-sm">Disponibilité</span>
+                                                <span className="text-green-400 font-semibold">{totalCamions > 0 ? Math.round((camionsDisponibles / totalCamions) * 100) : 0}%</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-dark-muted text-sm">En Service</span>
+                                                <span className="text-blue-400 font-semibold">{totalCamions > 0 ? Math.round((camionsEnService / totalCamions) * 100) : 0}%</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-dark-muted text-sm">Maintenance</span>
+                                                <span className="text-orange-400 font-semibold">{totalCamions > 0 ? Math.round((camionsEnMaintenance / totalCamions) * 100) : 0}%</span>
                                             </div>
                                         </div>
                                     </div>
