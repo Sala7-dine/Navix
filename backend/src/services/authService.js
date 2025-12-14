@@ -61,8 +61,15 @@ export async function login({ email, password }) {
       expiresAt,
     });
 
+    const userResponse = {
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role
+    };
+
     const accessToken = signAccessToken({ sub: user._id, roles: user.roles });
-    return { user, accessToken, refreshToken };
+    return { user: userResponse, accessToken, refreshToken };
   } catch (err) {
     throw err;
   }

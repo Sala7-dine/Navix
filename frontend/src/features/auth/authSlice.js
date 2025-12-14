@@ -21,8 +21,21 @@ export const login = createAsyncThunk(
       localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.user));
       return response;
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Échec de la connexion';
-      console.log('Extracted error message:', errorMessage);
+      // Gérer les différentes structures d'erreur du backend
+      let errorMessage = 'Échec de la connexion';
+      
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.errors && Array.isArray(data.errors)) {
+          // Si c'est un tableau d'erreurs, les joindre
+          errorMessage = data.errors.join(', ');
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      }
+      
       return rejectWithValue(errorMessage);
     }
   }
@@ -37,7 +50,22 @@ export const register = createAsyncThunk(
       localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.user));
       return response;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || "Échec de l'inscription");
+      // Gérer les différentes structures d'erreur du backend
+      let errorMessage = "Échec de l'inscription";
+      
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.errors && Array.isArray(data.errors)) {
+          // Si c'est un tableau d'erreurs, les joindre
+          errorMessage = data.errors.join(', ');
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      }
+      
+      return rejectWithValue(errorMessage);
     }
   }
 );

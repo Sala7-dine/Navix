@@ -1,7 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
+import Sidebar from '../../components/layout/Sidebar';
+import Camions from './camions/Camions';
+import Trajets from './trajets/Trajets';
+import Pneus from './pneus/Pneus';
+import Remorques from './remorques/Remorques';
+import Maintenances from './maintenances/Maintenances';
+import Users from './users/Users';
+import FuelLogs from './fuellogs/FuelLogs';
 import {
     Chart,
     CategoryScale,
@@ -32,6 +40,7 @@ Chart.register(
 const AdminDashboard = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [activeSection, setActiveSection] = useState('dashboard');
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
@@ -147,50 +156,7 @@ const AdminDashboard = () => {
     return (
         <div className="admin-dashboard h-screen flex overflow-hidden">
             {/* Sidebar */}
-            <aside className="w-20 lg:w-64 flex-shrink-0 flex flex-col py-6 px-4 sidebar-bg">
-                {/* Logo */}
-                <div className="flex items-center gap-3 px-2 mb-12">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-cyan to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                    </div>
-                    <span className="text-xl font-bold tracking-wide text-white hidden lg:block">Navix</span>
-                </div>
-
-                {/* Nav Links */}
-                <nav className="flex-1 space-y-6">
-                    <button onClick={() => {}} className="sidebar-link active flex items-center gap-4 px-2 py-2 text-[#6F6C99] hover:text-white w-full">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>
-                        <span className="font-medium text-sm hidden lg:block">Dashboard</span>
-                    </button>
-                    <button onClick={() => {}} className="sidebar-link flex items-center gap-4 px-2 py-2 text-[#6F6C99] hover:text-white w-full">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M21 7.25a1.25 1.25 0 00-1.25-1.25H4.25a1.25 1.25 0 00-1.25 1.25v10.5c0 .69.56 1.25 1.25 1.25h15.5c.69 0 1.25-.56 1.25-1.25V7.25zM19 13.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /></svg>
-                        <span className="font-medium text-sm hidden lg:block">Wallet</span>
-                    </button>
-                    <button onClick={() => {}} className="sidebar-link flex items-center gap-4 px-2 py-2 text-[#6F6C99] hover:text-white w-full">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
-                        <span className="font-medium text-sm hidden lg:block">Messages</span>
-                        <span className="w-2 h-2 rounded-full bg-brand-pink ml-auto hidden lg:block shadow-[0_0_8px_#ec4899]"></span>
-                    </button>
-                    <button onClick={() => {}} className="sidebar-link flex items-center gap-4 px-2 py-2 text-[#6F6C99] hover:text-white w-full">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z" /></svg>
-                        <span className="font-medium text-sm hidden lg:block">Trade</span>
-                    </button>
-                    <button onClick={() => {}} className="sidebar-link flex items-center gap-4 px-2 py-2 text-[#6F6C99] hover:text-white w-full">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
-                        <span className="font-medium text-sm hidden lg:block">Account Setting</span>
-                    </button>
-                </nav>
-
-                {/* Logout */}
-                <div className="mt-auto">
-                    <button onClick={() => { dispatch(logout()); navigate('/login'); }} className="flex items-center gap-4 px-2 py-2 text-[#6F6C99] hover:text-white transition-colors w-full">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                        <span className="font-medium hidden lg:block">Déconnexion</span>
-                    </button>
-                </div>
-            </aside>
+            <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden relative dashboard-main">
@@ -235,7 +201,19 @@ const AdminDashboard = () => {
                 </header>
 
                 {/* Content Grid */}
-                <div className="flex-1 overflow-y-auto p-8 z-10">
+                <div className="flex-1 overflow-y-auto z-10">
+                    {/* Conditional Rendering based on activeSection */}
+                    {activeSection === 'camions' && <Camions />}
+                    {activeSection === 'trajets' && <Trajets />}
+                    {activeSection === 'pneus' && <Pneus />}
+                    {activeSection === 'remorques' && <Remorques />}
+                    {activeSection === 'maintenances' && <Maintenances />}
+                    {activeSection === 'users' && <Users />}
+                    {activeSection === 'fuellogs' && <FuelLogs />}
+                    
+                    {/* Dashboard Default View */}
+                    {activeSection === 'dashboard' && (
+                    <div className="p-8">
                     <div className="flex flex-col lg:flex-row gap-8 h-full">
                         
                         {/* Left Column (Main) */}
@@ -360,6 +338,8 @@ const AdminDashboard = () => {
 
                         </div>
                     </div>
+                    </div>
+                    )}
                 </div>
             </main>
         </div>

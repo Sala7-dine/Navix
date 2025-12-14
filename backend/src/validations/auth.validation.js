@@ -33,10 +33,6 @@ export const registerSchema = yup.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
       'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre'
     ),
-  confirmPassword: yup
-    .string()
-    .required('La confirmation du mot de passe est obligatoire')
-    .oneOf([yup.ref('password')], 'Les mots de passe ne correspondent pas'),
   role: yup
     .string()
     .oneOf(['admin', 'chauffeur'], 'Rôle invalide')
@@ -61,11 +57,7 @@ export const changePasswordSchema = yup.object({
       function (value) {
         return value !== this.parent.currentPassword;
       }
-    ),
-  confirmPassword: yup
-    .string()
-    .required('La confirmation du mot de passe est obligatoire')
-    .oneOf([yup.ref('newPassword')], 'Les mots de passe ne correspondent pas'),
+    )
 });
 
 export const forgotPasswordSchema = yup.object({
@@ -86,11 +78,7 @@ export const resetPasswordSchema = yup.object({
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
       'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre'
-    ),
-  confirmPassword: yup
-    .string()
-    .required('La confirmation du mot de passe est obligatoire')
-    .oneOf([yup.ref('newPassword')], 'Les mots de passe ne correspondent pas'),
+    )
 });
 
 export const refreshTokenSchema = yup.object({
