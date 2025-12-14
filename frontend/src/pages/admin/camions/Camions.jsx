@@ -1,36 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCamions, createCamion, updateCamion, deleteCamion } from '../../../features/camions/camionsSlice';
+import CamionModal from '../../../components/modals/CamionModal';
 import '../../admin/AdminDashboard.css';
 
 const Camions = () => {
-    const [camions] = useState([
-        {
-            id: 1,
-            matricule: 'ABC-123',
-            marque: 'Mercedes',
-            modele: 'Actros',
-            annee: 2020,
-            statut: 'DISPONIBLE',
-            kilometrage: 145000
-        },
-        {
-            id: 2,
-            matricule: 'DEF-456',
-            marque: 'Volvo',
-            modele: 'FH16',
-            annee: 2019,
-            statut: 'EN_MISSION',
-            kilometrage: 198000
-        },
-        {
-            id: 3,
-            matricule: 'GHI-789',
-            marque: 'Scania',
-            modele: 'R500',
-            annee: 2021,
-            statut: 'MAINTENANCE',
-            kilometrage: 87000
+    const dispatch = useDispatch();
+    const { camions, loading, error } = useSelector((state) => state.camions);
+    
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCamion, setSelectedCamion] = useState(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [camionToDelete, setCamionToDelete] = useState(null);
+    const [notification, setNotification] = useState(null);
+
+    // Fetch camions on mount
+    useEffect(() => {
+        dispatch(fetchCamions());
+    }, [dispatch]);
+
+    // Show notification
+    const showNotification = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 3000);
+    };
+
+    // Handle create/update submit
+    const handleSubmit = async (formData) => {
+        try {
+            if (selectedCamion) {
+                await dispatch(updateCamion({ id: selectedCamion._id, data: formData })).unwrap();
+                showNotification('Camion modifié avec succès');
+            } else {
+                await dispatch(createCamion(formData)).unwrap();
+                showNotification('Camion créé avec succès');
+            }
+            setIsModalOpen(false);
+            setSelectedCamion(null);
+        } catch (err) {
+            showNotification(err.message || 'Une erreur est survenue', 'error');
         }
-    ]);
+    };
+
+    // Handle edit
+    const handleEdit = (camion) => {
+        setSelectedCamion(camion);
+        setIsModalOpen(true);
+    };
+
+    // Handle delete confirm
+    const handleDeleteClick = (camion) => {
+        setCamionToDelete(camion);
+        setShowDeleteConfirm(true);
+    };
+
+    // Handle delete
+    const handleDelete = async () => {
+        try {
+            await dispatch(deleteCamion(camionToDelete._id)).unwrap();
+            showNotification('Camion supprimé avec succès');
+            setShowDeleteConfirm(false);
+            setCamionToDelete(null);
+        } catch (err) {
+            showNotification(err.message || 'Erreur lors de la suppression', 'error');
+        }
+    };
+
+    // Handle add new
+    const handleAddNew = () => {
+        setSelectedCamion(null);
+        setIsModalOpen(true);
+    };
 
     const getStatusColor = (statut) => {
         switch (statut) {
@@ -60,10 +100,38 @@ const Camions = () => {
                     <h1 className="text-3xl font-bold text-white mb-2">Gestion des Camions</h1>
                     <p className="text-dark-muted">Gérez tous les camions de la flotte</p>
                 </div>
-                <button className="px-6 py-3 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all">
+                <button 
+                    onClick={handleAddNew}
+                    className="px-6 py-3 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all"
+                >
                     + Nouveau Camion
                 </button>
             </div>
+
+            {/* Notification */}
+            {notification && (
+                <div className={`mb-6 p-4 rounded-lg ${
+                    notification.type === 'success' ? 'bg-green-500/20 border border-green-500/50' : 'bg-red-500/20 border border-red-500/50'
+                }`}>
+                    <p className={notification.type === 'success' ? 'text-green-300' : 'text-red-300'}>
+                        {notification.message}
+                    </p>
+                </div>
+            )}
+
+            {/* Loading State */}
+            {loading && (
+                <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-cyan"></div>
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/50">
+                    <p className="text-red-300">{error}</p>
+                </div>
+            )}
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -78,7 +146,7 @@ const Camions = () => {
                     
                     <div className="text-right z-10">
                         <div className="flex items-baseline justify-end gap-2 mb-1">
-                            <span className="text-2xl font-bold text-white">18</span>
+                            <span className="text-2xl font-bold text-white">{camions.length}</span>
                             <span className="text-xs font-medium text-white/80 uppercase">Total</span>
                         </div>
                         <div className="flex items-center justify-end gap-2">
@@ -101,7 +169,9 @@ const Camions = () => {
                     
                     <div className="text-right z-10">
                         <div className="flex items-baseline justify-end gap-2 mb-1">
-                            <span className="text-2xl font-bold text-white">12</span>
+                            <span className="text-2xl font-bold text-white">
+                                {camions.filter(c => c.statut === 'DISPONIBLE').length}
+                            </span>
                             <span className="text-xs font-medium text-dark-muted uppercase">Disponibles</span>
                         </div>
                         <div className="flex items-center justify-end gap-2">
@@ -124,7 +194,9 @@ const Camions = () => {
                     
                     <div className="text-right z-10">
                         <div className="flex items-baseline justify-end gap-2 mb-1">
-                            <span className="text-2xl font-bold text-white">4</span>
+                            <span className="text-2xl font-bold text-white">
+                                {camions.filter(c => c.statut === 'EN_MISSION').length}
+                            </span>
                             <span className="text-xs font-medium text-dark-muted uppercase">En Mission</span>
                         </div>
                         <div className="flex items-center justify-end gap-2">
@@ -147,7 +219,9 @@ const Camions = () => {
                     
                     <div className="text-right z-10">
                         <div className="flex items-baseline justify-end gap-2 mb-1">
-                            <span className="text-2xl font-bold text-white">2</span>
+                            <span className="text-2xl font-bold text-white">
+                                {camions.filter(c => c.statut === 'MAINTENANCE').length}
+                            </span>
                             <span className="text-xs font-medium text-dark-muted uppercase">Maintenance</span>
                         </div>
                         <div className="flex items-center justify-end gap-2">
@@ -163,29 +237,43 @@ const Camions = () => {
 
             {/* Table */}
             <div className="glass-card p-6 rounded-xl border border-white/10">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-white/10">
-                                <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">ID</th>
-                                <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Matricule</th>
-                                <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Marque</th>
-                                <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Modèle</th>
-                                <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Année</th>
-                                <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Kilométrage</th>
-                                <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Statut</th>
-                                <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Actions</th>
-                            </tr>
+                {!loading && camions.length === 0 ? (
+                    <div className="text-center py-12">
+                        <svg className="w-16 h-16 text-dark-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p className="text-dark-muted mb-4">Aucun camion disponible</p>
+                        <button 
+                            onClick={handleAddNew}
+                            className="px-6 py-2 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all"
+                        >
+                            Ajouter votre premier camion
+                        </button>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-white/10">
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">ID</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Matricule</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Marque</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Modèle</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Année</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Kilométrage</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Statut</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Actions</th>
+                                </tr>
                         </thead>
                         <tbody>
-                            {camions.map((camion) => (
-                                <tr key={camion.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                    <td className="py-4 px-4 text-white">#{camion.id}</td>
+                            {camions.map((camion, index) => (
+                                <tr key={camion._id || index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                    <td className="py-4 px-4 text-white">#{index + 1}</td>
                                     <td className="py-4 px-4 text-white font-medium">{camion.matricule}</td>
                                     <td className="py-4 px-4 text-white">{camion.marque}</td>
                                     <td className="py-4 px-4 text-dark-muted">{camion.modele}</td>
                                     <td className="py-4 px-4 text-dark-muted">{camion.annee}</td>
-                                    <td className="py-4 px-4 text-dark-muted">{camion.kilometrage.toLocaleString()} km</td>
+                                    <td className="py-4 px-4 text-dark-muted">{camion.kilometrage?.toLocaleString() || 0} km</td>
                                     <td className="py-4 px-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(camion.statut)} text-white`}>
                                             {getStatusText(camion.statut)}
@@ -193,18 +281,20 @@ const Camions = () => {
                                     </td>
                                     <td className="py-4 px-4">
                                         <div className="flex gap-2">
-                                            <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                                                <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                            </button>
-                                            <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                                            <button 
+                                                onClick={() => handleEdit(camion)}
+                                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                                title="Modifier"
+                                            >
                                                 <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
                                             </button>
-                                            <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                                            <button 
+                                                onClick={() => handleDeleteClick(camion)}
+                                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                                title="Supprimer"
+                                            >
                                                 <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
@@ -216,9 +306,65 @@ const Camions = () => {
                         </tbody>
                     </table>
                 </div>
+                )}
             </div>
+
+            {/* Modals */}
+            <CamionModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedCamion(null);
+                }}
+                onSubmit={handleSubmit}
+                camion={selectedCamion}
+                loading={loading}
+            />
+
+            {/* Delete Confirmation Dialog */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="glass-card rounded-2xl max-w-md w-full p-6">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Confirmer la suppression</h3>
+                                <p className="text-dark-muted text-sm">Cette action est irréversible</p>
+                            </div>
+                        </div>
+                        <p className="text-white mb-6">
+                            Êtes-vous sûr de vouloir supprimer le camion <span className="font-bold text-brand-cyan">{camionToDelete?.matricule}</span> ?
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                    setCamionToDelete(null);
+                                }}
+                                className="flex-1 px-6 py-3 bg-white/5 text-white rounded-lg font-semibold hover:bg-white/10 transition-colors"
+                                disabled={loading}
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="flex-1 px-6 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors disabled:opacity-50"
+                                disabled={loading}
+                            >
+                                {loading ? 'Suppression...' : 'Supprimer'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
+
+export default Camions;
 
 export default Camions;
