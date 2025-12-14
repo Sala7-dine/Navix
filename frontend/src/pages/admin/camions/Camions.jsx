@@ -72,8 +72,8 @@ const Camions = () => {
         setIsModalOpen(true);
     };
 
-    const getStatusColor = (statut) => {
-        switch (statut) {
+    const getStatusColor = (status) => {
+        switch (status) {
             case 'DISPONIBLE': return 'bg-green-500';
             case 'EN_MISSION': return 'bg-blue-500';
             case 'EN_TRAJET': return 'bg-yellow-500';
@@ -82,13 +82,13 @@ const Camions = () => {
         }
     };
 
-    const getStatusText = (statut) => {
-        switch (statut) {
+    const getStatusText = (status) => {
+        switch (status) {
             case 'DISPONIBLE': return 'Disponible';
             case 'EN_MISSION': return 'En mission';
             case 'EN_TRAJET': return 'En trajet';
             case 'MAINTENANCE': return 'Maintenance';
-            default: return statut;
+            default: return status;
         }
     };
 
@@ -170,7 +170,7 @@ const Camions = () => {
                     <div className="text-right z-10">
                         <div className="flex items-baseline justify-end gap-2 mb-1">
                             <span className="text-2xl font-bold text-white">
-                                {camions.filter(c => c.statut === 'DISPONIBLE').length}
+                                {camions.filter(c => c.status === 'DISPONIBLE').length}
                             </span>
                             <span className="text-xs font-medium text-dark-muted uppercase">Disponibles</span>
                         </div>
@@ -195,7 +195,7 @@ const Camions = () => {
                     <div className="text-right z-10">
                         <div className="flex items-baseline justify-end gap-2 mb-1">
                             <span className="text-2xl font-bold text-white">
-                                {camions.filter(c => c.statut === 'EN_MISSION').length}
+                                {camions.filter(c => c.status === 'EN_MISSION').length}
                             </span>
                             <span className="text-xs font-medium text-dark-muted uppercase">En Mission</span>
                         </div>
@@ -220,7 +220,7 @@ const Camions = () => {
                     <div className="text-right z-10">
                         <div className="flex items-baseline justify-end gap-2 mb-1">
                             <span className="text-2xl font-bold text-white">
-                                {camions.filter(c => c.statut === 'MAINTENANCE').length}
+                                {camions.filter(c => c.status === 'MAINTENANCE').length}
                             </span>
                             <span className="text-xs font-medium text-dark-muted uppercase">Maintenance</span>
                         </div>
@@ -259,9 +259,9 @@ const Camions = () => {
                                     <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Matricule</th>
                                     <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Marque</th>
                                     <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Modèle</th>
-                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Année</th>
                                     <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Kilométrage</th>
-                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Statut</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Capacité Réservoir</th>
+                                    <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Status</th>
                                     <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Actions</th>
                                 </tr>
                         </thead>
@@ -272,11 +272,11 @@ const Camions = () => {
                                     <td className="py-4 px-4 text-white font-medium">{camion.matricule}</td>
                                     <td className="py-4 px-4 text-white">{camion.marque}</td>
                                     <td className="py-4 px-4 text-dark-muted">{camion.modele}</td>
-                                    <td className="py-4 px-4 text-dark-muted">{camion.annee}</td>
-                                    <td className="py-4 px-4 text-dark-muted">{camion.kilometrage?.toLocaleString() || 0} km</td>
+                                    <td className="py-4 px-4 text-dark-muted">{camion.kilometrageActuel?.toLocaleString() || 0} km</td>
+                                    <td className="py-4 px-4 text-dark-muted">{camion.capaciteReservoir || 0} L</td>
                                     <td className="py-4 px-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(camion.statut)} text-white`}>
-                                            {getStatusText(camion.statut)}
+                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(camion.status)} text-white`}>
+                                            {getStatusText(camion.status)}
                                         </span>
                                     </td>
                                     <td className="py-4 px-4">

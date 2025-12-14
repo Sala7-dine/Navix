@@ -5,12 +5,9 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
         matricule: '',
         marque: '',
         modele: '',
-        annee: new Date().getFullYear(),
-        kilometrage: 0,
-        statut: 'DISPONIBLE',
-        capaciteCharge: 0,
-        typeCarburant: 'DIESEL',
-        consommationMoyenne: 0
+        capaciteReservoir: 0,
+        kilometrageActuel: 0,
+        status: 'DISPONIBLE'
     });
 
     const [errors, setErrors] = useState({});
@@ -21,24 +18,18 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
                 matricule: camion.matricule || '',
                 marque: camion.marque || '',
                 modele: camion.modele || '',
-                annee: camion.annee || new Date().getFullYear(),
-                kilometrage: camion.kilometrage || 0,
-                statut: camion.statut || 'DISPONIBLE',
-                capaciteCharge: camion.capaciteCharge || 0,
-                typeCarburant: camion.typeCarburant || 'DIESEL',
-                consommationMoyenne: camion.consommationMoyenne || 0
+                capaciteReservoir: camion.capaciteReservoir || 0,
+                kilometrageActuel: camion.kilometrageActuel || 0,
+                status: camion.status || 'DISPONIBLE'
             });
         } else {
             setFormData({
                 matricule: '',
                 marque: '',
                 modele: '',
-                annee: new Date().getFullYear(),
-                kilometrage: 0,
-                statut: 'DISPONIBLE',
-                capaciteCharge: 0,
-                typeCarburant: 'DIESEL',
-                consommationMoyenne: 0
+                capaciteReservoir: 0,
+                kilometrageActuel: 0,
+                status: 'DISPONIBLE'
             });
         }
         setErrors({});
@@ -68,14 +59,11 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
         if (!formData.modele.trim()) {
             newErrors.modele = 'Le modèle est requis';
         }
-        if (formData.annee < 1900 || formData.annee > new Date().getFullYear() + 1) {
-            newErrors.annee = 'Année invalide';
+        if (formData.kilometrageActuel < 0) {
+            newErrors.kilometrageActuel = 'Le kilométrage doit être positif';
         }
-        if (formData.kilometrage < 0) {
-            newErrors.kilometrage = 'Le kilométrage doit être positif';
-        }
-        if (formData.capaciteCharge <= 0) {
-            newErrors.capaciteCharge = 'La capacité de charge doit être positive';
+        if (formData.capaciteReservoir <= 0) {
+            newErrors.capaciteReservoir = 'La capacité du réservoir doit être positive';
         }
 
         setErrors(newErrors);
@@ -92,8 +80,8 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl">
+            <div className="bg-[#252140]/95 backdrop-blur-2xl rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-white/10">
                     <h2 className="text-2xl font-bold text-white">
@@ -101,20 +89,20 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-lg"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     {/* Row 1 - Matricule, Marque */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-400 mb-2">
                                 Matricule <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -122,9 +110,9 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
                                 name="matricule"
                                 value={formData.matricule}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border ${
-                                    errors.matricule ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:border-brand-cyan transition-colors`}
+                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
+                                    errors.matricule ? 'border-red-500/50' : 'border-white/10'
+                                } focus:outline-none focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 transition-all placeholder-gray-500`}
                                 placeholder="ABC-123"
                             />
                             {errors.matricule && (
@@ -133,7 +121,7 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-400 mb-2">
                                 Marque <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -141,9 +129,9 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
                                 name="marque"
                                 value={formData.marque}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border ${
-                                    errors.marque ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:border-brand-cyan transition-colors`}
+                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
+                                    errors.marque ? 'border-red-500/50' : 'border-white/10'
+                                } focus:outline-none focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 transition-all placeholder-gray-500`}
                                 placeholder="Mercedes, Volvo, Scania..."
                             />
                             {errors.marque && (
@@ -152,135 +140,77 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
                         </div>
                     </div>
 
-                    {/* Row 2 - Modèle, Année */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Modèle <span className="text-red-400">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="modele"
-                                value={formData.modele}
-                                onChange={handleChange}
-                                className={`w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border ${
-                                    errors.modele ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:border-brand-cyan transition-colors`}
-                                placeholder="Actros, FH16, R500..."
-                            />
-                            {errors.modele && (
-                                <p className="mt-1 text-sm text-red-400">{errors.modele}</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Année <span className="text-red-400">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                name="annee"
-                                value={formData.annee}
-                                onChange={handleChange}
-                                className={`w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border ${
-                                    errors.annee ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:border-brand-cyan transition-colors`}
-                                min="1900"
-                                max={new Date().getFullYear() + 1}
-                            />
-                            {errors.annee && (
-                                <p className="mt-1 text-sm text-red-400">{errors.annee}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Row 3 - Kilométrage, Capacité */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Kilométrage (km)
-                            </label>
-                            <input
-                                type="number"
-                                name="kilometrage"
-                                value={formData.kilometrage}
-                                onChange={handleChange}
-                                className={`w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border ${
-                                    errors.kilometrage ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:border-brand-cyan transition-colors`}
-                                min="0"
-                            />
-                            {errors.kilometrage && (
-                                <p className="mt-1 text-sm text-red-400">{errors.kilometrage}</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Capacité de Charge (tonnes) <span className="text-red-400">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                name="capaciteCharge"
-                                value={formData.capaciteCharge}
-                                onChange={handleChange}
-                                className={`w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border ${
-                                    errors.capaciteCharge ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:border-brand-cyan transition-colors`}
-                                min="0"
-                                step="0.1"
-                            />
-                            {errors.capaciteCharge && (
-                                <p className="mt-1 text-sm text-red-400">{errors.capaciteCharge}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Row 4 - Type Carburant, Consommation */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Type de Carburant
-                            </label>
-                            <select
-                                name="typeCarburant"
-                                value={formData.typeCarburant}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border border-white/10 focus:outline-none focus:border-brand-cyan transition-colors"
-                            >
-                                <option value="DIESEL">Diesel</option>
-                                <option value="ESSENCE">Essence</option>
-                                <option value="ELECTRIQUE">Électrique</option>
-                                <option value="HYBRIDE">Hybride</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Consommation Moyenne (L/100km)
-                            </label>
-                            <input
-                                type="number"
-                                name="consommationMoyenne"
-                                value={formData.consommationMoyenne}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border border-white/10 focus:outline-none focus:border-brand-cyan transition-colors"
-                                min="0"
-                                step="0.1"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Row 5 - Statut */}
+                    {/* Row 2 - Modèle */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Statut
+                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                            Modèle <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="modele"
+                            value={formData.modele}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
+                                errors.modele ? 'border-red-500/50' : 'border-white/10'
+                            } focus:outline-none focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 transition-all placeholder-gray-500`}
+                            placeholder="T High 3000..."
+                        />
+                        {errors.modele && (
+                            <p className="mt-1 text-sm text-red-400">{errors.modele}</p>
+                        )}
+                    </div>
+
+                    {/* Row 3 - Kilométrage Actuel, Capacité Réservoir */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-2">
+                                Kilométrage Actuel (km) <span className="text-red-400">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                name="kilometrageActuel"
+                                value={formData.kilometrageActuel}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
+                                    errors.kilometrageActuel ? 'border-red-500/50' : 'border-white/10'
+                                } focus:outline-none focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 transition-all placeholder-gray-500`}
+                                min="0"
+                            />
+                            {errors.kilometrageActuel && (
+                                <p className="mt-1 text-sm text-red-400">{errors.kilometrageActuel}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-2">
+                                Capacité Réservoir (litres) <span className="text-red-400">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                name="capaciteReservoir"
+                                value={formData.capaciteReservoir}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
+                                    errors.capaciteReservoir ? 'border-red-500/50' : 'border-white/10'
+                                } focus:outline-none focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 transition-all placeholder-gray-500`}
+                                min="0"
+                            />
+                            {errors.capaciteReservoir && (
+                                <p className="mt-1 text-sm text-red-400">{errors.capaciteReservoir}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Row 4 - Status */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                            Status
                         </label>
                         <select
-                            name="statut"
-                            value={formData.statut}
+                            name="status"
+                            value={formData.status}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 bg-[#15132b] text-white rounded-lg border border-white/10 focus:outline-none focus:border-brand-cyan transition-colors"
+                            className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 transition-all"
                         >
                             <option value="DISPONIBLE">Disponible</option>
                             <option value="EN_MISSION">En Mission</option>
@@ -291,18 +221,18 @@ const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex gap-3 pt-4 border-t border-white/10">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-6 py-3 bg-white/5 text-white rounded-lg font-semibold hover:bg-white/10 transition-colors"
+                            className="flex-1 px-6 py-3 bg-white/5 text-gray-300 rounded-xl font-medium hover:bg-white/10 transition-all"
                             disabled={loading}
                         >
                             Annuler
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 px-6 py-3 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 px-6 py-3 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-cyan-500/30 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={loading}
                         >
                             {loading ? 'En cours...' : camion ? 'Modifier' : 'Créer'}
