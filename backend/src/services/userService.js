@@ -1,9 +1,23 @@
 import User from "../models/User.js";
 
-export const createUser = async (user) => {
+export const createUser = async (userData) => {
     try {
-        const data = await User.create(user).select("-password");
-        return data; 
+        const user = new User(userData);
+        if (userData.password) {
+            await user.setPassword(userData.password);
+        }
+        await user.save();
+        
+        const userResponse = {
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+        };
+        
+        return userResponse;
     } catch(err) {
         throw new Error(err.message); 
     }
@@ -12,7 +26,7 @@ export const createUser = async (user) => {
 export const getAllUsers = async (filters = {}) => {
     try {
         const query = { ...filters };
-        const users = await User.find(query).select('-password');
+        const users = await User.find(query).select('-passwordHash');
         return users;
     } catch(err) {
         throw new Error(err.message);
@@ -21,7 +35,7 @@ export const getAllUsers = async (filters = {}) => {
 
 export const getUserById = async (id) => {
     try {
-        const user = await User.findOne({ _id: id  }).select('-password');
+        const user = await User.findById(id).select('-passwordHash');
         if (!user) {
             throw new Error('Utilisateur introuvable');
         }
@@ -38,11 +52,11 @@ export const updateUser = async (id, updateData) => {
             delete updateData.password;
         }
         
-        const user = await User.findOneAndUpdate(
-            { _id: id },
+        const user = await User.findByIdAndUpdate(
+            id,
             { $set: updateData },
             { new: true, runValidators: true }
-        ).select('-password');
+        ).select('-passwordHash');
         
         if (!user) {
             throw new Error('Utilisateur introuvable');
@@ -56,7 +70,7 @@ export const updateUser = async (id, updateData) => {
 
 export const deleteUser = async (id) => {
     try {
-        const user = await User.findOneAndDelete(id).select('-password');
+        const user = await User.findByIdAndDelete(id).select('-passwordHash');
         
         if (!user) {
             throw new Error('Utilisateur introuvable');
@@ -72,7 +86,7 @@ export const getChauffeurs = async () => {
     try {
         const chauffeurs = await User.find({ 
             role: 'chauffeur'
-        }).select('-password');
+        }).select('-passwordHash');
         return chauffeurs;
     } catch(err) {
         throw new Error(err.message);

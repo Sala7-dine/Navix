@@ -166,41 +166,6 @@ const Users = () => {
                             <span className="text-2xl font-bold text-white">{actifs}</span>
                             <span className="text-xs font-medium text-dark-muted uppercase">Actifs</span>
                         </div>
-                        </svg>
-                    </div>
-                    <div className="text-right z-10">
-                        <div className="flex items-baseline justify-end gap-2 mb-1">
-                            <span className="text-2xl font-bold text-white">4</span>
-                            <span className="text-xs font-medium text-dark-muted uppercase">Admins</span>
-                        </div>
-                        <div className="flex items-center justify-end gap-2">
-                            <svg className="w-12 h-5 text-purple-400/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 12c5 0 8-8 12-8s7 12 12 12 8-10 12-10 8 6 10 6"/></svg>
-                            <span className="text-xs font-bold text-purple-400 flex items-center">
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                5.5%
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="glass-card rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group hover:bg-white/5 transition-all duration-300">
-                    <div className="w-12 h-12 rounded-full bg-[#2d2b45] flex items-center justify-center">
-                        <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div className="text-right z-10">
-                        <div className="flex items-baseline justify-end gap-2 mb-1">
-                            <span className="text-2xl font-bold text-white">22</span>
-                            <span className="text-xs font-medium text-dark-muted uppercase">Actifs</span>
-                        </div>
-                        <div className="flex items-center justify-end gap-2">
-                            <svg className="w-12 h-5 text-green-400/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 10c5 0 8-5 12-5s7 10 12 10 8-8 12-8 8 5 10 5"/></svg>
-                            <span className="text-xs font-bold text-green-400 flex items-center">
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                16.7%
-                            </span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -329,8 +294,6 @@ const Users = () => {
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
                     </div>
                 </div>
             )}
