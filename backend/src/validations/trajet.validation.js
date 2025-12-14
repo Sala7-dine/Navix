@@ -59,17 +59,6 @@ export const createTrajetSchema = yup.object({
     .required('La date de départ est requise'),
   dateArrivee: yup
     .date()
-    .when('dateDepart', (dateDepart, schema) => {
-      return schema.test({
-        test: (dateArrivee) => {
-          if (dateDepart && dateArrivee) {
-            return dateArrivee >= dateDepart;
-          }
-          return true;
-        },
-        message: "La date d'arrivée doit être postérieure à la date de départ",
-      });
-    })
     .optional(),
   remarques: yup
     .string()

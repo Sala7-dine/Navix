@@ -26,7 +26,6 @@ export const createFuelLogSchema = yup.object({
     .optional(), // Sera calculé automatiquement
   date: yup
     .date()
-    .max(new Date(), 'La date ne peut pas être dans le futur')
     .default(() => new Date()),
   lieuStation: yup
     .string()

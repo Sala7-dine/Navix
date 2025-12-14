@@ -60,17 +60,7 @@ const trajetSchema = new mongoose.Schema(
       required: [true, 'La date de départ est requise'],
     },
     dateArrivee: {
-      type: Date,
-      validate: {
-        validator: function (value) {
-          // Valider seulement si une date d'arrivée est fournie
-          if (value) {
-            return value >= this.dateDepart;
-          }
-          return true;
-        },
-        message: 'La date d\'arrivée doit être postérieure à la date de départ',
-      },
+      type: Date
     },
     remarques: {
       type: String,
