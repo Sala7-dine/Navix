@@ -306,7 +306,7 @@ const Camions = () => {
                         </tbody>
                     </table>
                 </div>
-                )}
+            )}
             </div>
 
             {/* Modals */}
@@ -364,7 +364,5 @@ const Camions = () => {
         </div>
     );
 };
-
-export default Camions;
 
 export default Camions;
