@@ -140,8 +140,8 @@ const ChauffeurDashboard = () => {
                     {/* Card 1 - Total Trajets */}
                     <div className="cyan-card rounded-2xl p-6 flex items-center justify-between shadow-lg shadow-cyan-500/20 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
                         <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                             </svg>
                         </div>
                         
@@ -154,7 +154,7 @@ const ChauffeurDashboard = () => {
                                 <svg className="w-12 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 10c5 0 8-5 12-5s7 10 12 10 8-8 12-8 8 5 10 5"/></svg>
                                 <span className="text-xs font-bold text-white flex items-center bg-white/20 px-1.5 py-0.5 rounded backdrop-blur-sm">
                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                    12.5%
+                                    {mesTrajets.length > 0 ? Math.round((trajetsTermines.length / mesTrajets.length) * 100) : 0}%
                                 </span>
                             </div>
                         </div>
@@ -163,8 +163,8 @@ const ChauffeurDashboard = () => {
                     {/* Card 2 - En Cours */}
                     <div className="glass-card rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group hover:bg-white/5 transition-all duration-300">
                         <div className="w-12 h-12 rounded-full bg-[#2d2b45] flex items-center justify-center">
-                            <svg className="w-6 h-6 text-brand-pink" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+                            <svg className="w-6 h-6 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
                         </div>
                         
@@ -175,52 +175,134 @@ const ChauffeurDashboard = () => {
                             </div>
                             <div className="flex items-center justify-end gap-2">
                                 <svg className="w-12 h-5 text-brand-pink/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 15c5 0 8-10 12-10s7 15 12 15 8-12 12-12 8 8 10 8"/></svg>
-                                <span className="text-xs font-bold text-red-400 flex items-center">
-                                    <svg className="w-3 h-3 mr-1 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                    5.23%
+                                <span className="text-xs font-bold text-yellow-400 flex items-center">
+                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01"/></svg>
+                                    {mesTrajets.length > 0 ? Math.round((trajetsEnCours.length / mesTrajets.length) * 100) : 0}%
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Card 3 - Distance */}
+                    {/* Card 3 - Distance Totale */}
                     <div className="glass-card rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group hover:bg-white/5 transition-all duration-300">
                         <div className="w-12 h-12 rounded-full bg-[#2d2b45] flex items-center justify-center">
-                            <svg className="w-6 h-6 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 01-1.447-.894L15 7m0 13V7"/></svg>
+                            <svg className="w-6 h-6 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
                         </div>
                         
                         <div className="text-right z-10">
                             <div className="flex items-baseline justify-end gap-2 mb-1">
-                                <span className="text-2xl font-bold text-white">{totalDistance.toLocaleString()} km</span>
-                                <span className="text-xs font-medium text-dark-muted uppercase">Distance</span>
+                                <span className="text-2xl font-bold text-white">{totalDistance.toLocaleString()}</span>
+                                <span className="text-xs font-medium text-dark-muted uppercase">km</span>
                             </div>
                             <div className="flex items-center justify-end gap-2">
                                 <svg className="w-12 h-5 text-brand-pink/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 15c5 0 8-10 12-10s7 15 12 15 8-12 12-12 8 8 10 8"/></svg>
-                                <span className="text-xs font-bold text-red-400 flex items-center">
-                                    <svg className="w-3 h-3 mr-1 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                    5.23%
+                                <span className="text-xs font-bold text-green-400 flex items-center">
+                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                    Total
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Card 4 - Moyenne */}
+                    {/* Card 4 - Distance Moyenne */}
                     <div className="glass-card rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group hover:bg-white/5 transition-all duration-300">
                         <div className="w-12 h-12 rounded-full bg-[#2d2b45] flex items-center justify-center">
-                            <svg className="w-6 h-6 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <svg className="w-6 h-6 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
                         </div>
                         
                         <div className="text-right z-10">
                             <div className="flex items-baseline justify-end gap-2 mb-1">
-                                <span className="text-2xl font-bold text-white">{moyenneDistance} km</span>
-                                <span className="text-xs font-medium text-dark-muted uppercase">Moyenne</span>
+                                <span className="text-2xl font-bold text-white">{moyenneDistance}</span>
+                                <span className="text-xs font-medium text-dark-muted uppercase">km/trajet</span>
                             </div>
                             <div className="flex items-center justify-end gap-2">
                                 <svg className="w-12 h-5 text-brand-cyan/50" fill="none" stroke="currentColor" viewBox="0 0 50 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 12c5 0 8-8 12-8s7 12 12 12 8-10 12-10 8 6 10 6"/></svg>
                                 <span className="text-xs font-bold text-brand-cyan flex items-center">
                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                                    39.69%
+                                    Moyenne
                                 </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Secondary Stats Row */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    {/* Trajets Planifiés */}
+                    <div className="glass-panel rounded-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-white font-semibold">Planifiés</h3>
+                            <div className="bg-blue-500/10 p-2 rounded-lg">
+                                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-dark-muted text-sm">À venir</span>
+                                <span className="text-white font-bold text-2xl">{trajetsPlanifies.length}</span>
+                            </div>
+                            <div className="w-full bg-[#2d2b45] rounded-full h-2">
+                                <div 
+                                    className="bg-blue-500 h-2 rounded-full transition-all" 
+                                    style={{ width: `${mesTrajets.length > 0 ? (trajetsPlanifies.length / mesTrajets.length) * 100 : 0}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Trajets Terminés */}
+                    <div className="glass-panel rounded-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-white font-semibold">Terminés</h3>
+                            <div className="bg-green-500/10 p-2 rounded-lg">
+                                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-dark-muted text-sm">Complétés</span>
+                                <span className="text-white font-bold text-2xl">{trajetsTermines.length}</span>
+                            </div>
+                            <div className="w-full bg-[#2d2b45] rounded-full h-2">
+                                <div 
+                                    className="bg-green-500 h-2 rounded-full transition-all" 
+                                    style={{ width: `${mesTrajets.length > 0 ? (trajetsTermines.length / mesTrajets.length) * 100 : 0}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Taux de Complétion */}
+                    <div className="glass-panel rounded-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-white font-semibold">Performance</h3>
+                            <div className="bg-cyan-500/10 p-2 rounded-lg">
+                                <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-dark-muted text-sm">Taux de succès</span>
+                                <span className="text-white font-bold text-2xl">
+                                    {mesTrajets.length > 0 ? Math.round((trajetsTermines.length / mesTrajets.length) * 100) : 0}%
+                                </span>
+                            </div>
+                            <div className="w-full bg-[#2d2b45] rounded-full h-2">
+                                <div 
+                                    className="bg-cyan-500 h-2 rounded-full transition-all" 
+                                    style={{ width: `${mesTrajets.length > 0 ? (trajetsTermines.length / mesTrajets.length) * 100 : 0}%` }}
+                                ></div>
                             </div>
                         </div>
                     </div>
@@ -402,54 +484,6 @@ const ChauffeurDashboard = () => {
         </div>
     );
 
-    return (
-        <div className="chauffeur-dashboard h-screen flex overflow-hidden bg-[#0f0e1a]">
-            {/* Sidebar */}
-            <ChauffeurSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-
-            {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden">
-                {/* Header */}
-                <header className="h-20 flex items-center justify-between px-8 bg-black/20 backdrop-blur-xl border-b border-white/5">
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">
-                            {activeSection === 'dashboard' && 'Dashboard'}
-                            {activeSection === 'mes-trajets' && 'Mes Trajets'}
-                            {activeSection === 'historique' && 'Historique'}
-                            {activeSection === 'mon-profil' && 'Mon Profil'}
-                        </h1>
-                    </div>
-                    
-                    <div className="flex items-center gap-4">
-                        {/* Notification Bell */}
-                        <button className="relative w-10 h-10 rounded-xl bg-[#252140]/95 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#2d2b45] transition-colors border border-white/10">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                            </svg>
-                            <span className="absolute top-1 right-1 w-2 h-2 bg-brand-pink rounded-full shadow-lg shadow-pink-500/50"></span>
-                        </button>
-
-                        {/* Profile */}
-                        <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[#252140]/95 border border-white/10">
-                            <img 
-                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'Chauffeur')}&background=06b6d4&color=fff`}
-                                className="w-8 h-8 rounded-lg" 
-                                alt="Profile"
-                            />
-                            <span className="text-sm font-medium text-white hidden lg:block">
-                                {user?.fullName || 'Chauffeur'}
-                            </span>
-                        </div>
-                    </div>
-                </header>
-
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 bg-gradient-to-br from-[#0f0e1a] via-[#1a1633] to-[#0f0e1a]">
-                    {renderSection()}
-                </div>
-            </main>
-        </div>
-    );
 };
 
 export default ChauffeurDashboard;

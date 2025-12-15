@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMesTrajets, updateStatutTrajet } from '../../features/trajets/trajetsSlice';
+import { trajetsService } from '../../services/api';
 
 const MesTrajets = () => {
     const dispatch = useDispatch();
@@ -11,6 +12,7 @@ const MesTrajets = () => {
     const [showFinishModal, setShowFinishModal] = useState(false);
     const [selectedTrajet, setSelectedTrajet] = useState(null);
     const [kilometrageArrivee, setKilometrageArrivee] = useState('');
+    const [downloadingPDF, setDownloadingPDF] = useState(null);
 
     // Les trajets sont déjà filtrés par le backend pour le chauffeur connecté
     const mesTrajets = trajets;
@@ -72,6 +74,32 @@ const MesTrajets = () => {
             showNotification(error || 'Erreur lors de la finalisation', 'error');
         } finally {
             setUpdating(null);
+        }
+    };
+
+    const handleDownloadPDF = async (trajetId, trajetInfo) => {
+        try {
+            setDownloadingPDF(trajetId);
+            const pdfBlob = await trajetsService.downloadPDF(trajetId);
+            
+            // Créer un lien de téléchargement
+            const url = window.URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `trajet_${trajetInfo.lieuDepart}_${trajetInfo.lieuArrivee}_${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Nettoyer
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(link);
+            
+            showNotification('PDF téléchargé avec succès !', 'success');
+        } catch (error) {
+            console.error('Erreur téléchargement PDF:', error);
+            showNotification('Erreur lors du téléchargement du PDF', 'error');
+        } finally {
+            setDownloadingPDF(null);
         }
     };
 
@@ -306,6 +334,28 @@ const MesTrajets = () => {
                                                         )}
                                                     </button>
                                                 )}
+                                                
+                                                {/* Bouton télécharger PDF */}
+                                                <button
+                                                    onClick={() => handleDownloadPDF(trajet._id, trajet)}
+                                                    disabled={downloadingPDF === trajet._id}
+                                                    className="px-3 py-1.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                                    title="Télécharger PDF"
+                                                >
+                                                    {downloadingPDF === trajet._id ? (
+                                                        <>
+                                                            <div className="w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                            </svg>
+                                                            <span>PDF</span>
+                                                        </>
+                                                    )}
+                                                </button>
+
                                                 <button
                                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                                                     title="Détails"

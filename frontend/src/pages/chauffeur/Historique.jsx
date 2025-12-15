@@ -1,11 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMesTrajets } from '../../features/trajets/trajetsSlice';
+import { trajetsService } from '../../services/api';
 
 const Historique = () => {
     const dispatch = useDispatch();
     const { trajets, loading } = useSelector((state) => state.trajets);
     const { user } = useSelector((state) => state.auth);
+    const [downloadingPDF, setDownloadingPDF] = useState(null);
+    const [notification, setNotification] = useState(null);
 
     // Filtrer uniquement les trajets terminés (fetchMesTrajets retourne déjà les trajets du chauffeur connecté)
     const trajetsTermines = trajets.filter(
@@ -15,6 +18,37 @@ const Historique = () => {
     useEffect(() => {
         dispatch(fetchMesTrajets());
     }, [dispatch]);
+
+    const showNotification = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 3000);
+    };
+
+    const handleDownloadPDF = async (trajetId, trajetInfo) => {
+        try {
+            setDownloadingPDF(trajetId);
+            const pdfBlob = await trajetsService.downloadPDF(trajetId);
+            
+            // Créer un lien de téléchargement
+            const url = window.URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `trajet_${trajetInfo.lieuDepart}_${trajetInfo.lieuArrivee}_${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Nettoyer
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(link);
+            
+            showNotification('PDF téléchargé avec succès !', 'success');
+        } catch (error) {
+            console.error('Erreur téléchargement PDF:', error);
+            showNotification('Erreur lors du téléchargement du PDF', 'error');
+        } finally {
+            setDownloadingPDF(null);
+        }
+    };
 
     // Calculer les statistiques
     const totalDistance = trajetsTermines.reduce((sum, t) => sum + (t.distance || 0), 0);
@@ -33,6 +67,27 @@ const Historique = () => {
 
     return (
         <div className="space-y-6">
+            {/* Notification */}
+            {notification && (
+                <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl backdrop-blur-xl border shadow-lg transform transition-all duration-300 ${
+                    notification.type === 'success' 
+                        ? 'bg-green-500/20 border-green-500/30 text-green-400' 
+                        : 'bg-red-500/20 border-red-500/30 text-red-400'
+                }`}>
+                    <div className="flex items-center gap-3">
+                        {notification.type === 'success' ? (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        )}
+                        <span className="font-medium">{notification.message}</span>
+                    </div>
+                </div>
+            )}
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
@@ -109,6 +164,7 @@ const Historique = () => {
                                     <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Remorque</th>
                                     <th className="text-left py-4 px-4 text-dark-muted font-medium text-sm">Distance</th>
                                     <th className="text-center py-4 px-4 text-dark-muted font-medium text-sm">Statut</th>
+                                    <th className="text-center py-4 px-4 text-dark-muted font-medium text-sm">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#2d2b45]">
@@ -139,6 +195,31 @@ const Historique = () => {
                                             <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
                                                 Terminé
                                             </span>
+                                        </td>
+                                        <td className="py-4 px-4">
+                                            <div className="flex justify-center gap-2">
+                                                {/* Bouton télécharger PDF */}
+                                                <button
+                                                    onClick={() => handleDownloadPDF(trajet._id, trajet)}
+                                                    disabled={downloadingPDF === trajet._id}
+                                                    className="px-3 py-1.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                                    title="Télécharger PDF"
+                                                >
+                                                    {downloadingPDF === trajet._id ? (
+                                                        <>
+                                                            <div className="w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                                                            <span>Téléchargement...</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                            </svg>
+                                                            <span>Télécharger PDF</span>
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

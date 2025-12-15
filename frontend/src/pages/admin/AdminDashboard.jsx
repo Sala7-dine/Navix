@@ -46,6 +46,7 @@ const AdminDashboard = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState('dashboard');
+    const [showNotifications, setShowNotifications] = useState(false);
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
@@ -88,6 +89,9 @@ const AdminDashboard = () => {
     const totalUsers = users.length;
     const chauffeurs = users.filter(u => u.role === 'CHAUFFEUR').length;
     const admins = users.filter(u => u.role === 'ADMIN').length;
+
+    // Calculer le nombre total d'alertes
+    const totalAlerts = pneusCritique + camionsEnMaintenance + pneusASurveiller + trajetsEnCours + maintenancesEnCours;
 
     useEffect(() => {
         if (chartRef.current) {
@@ -227,12 +231,184 @@ const AdminDashboard = () => {
                         </button>
 
                         {/* Notification Bell */}
-                        <button className="relative w-10 h-10 rounded-xl bg-gradient-to-r from-brand-pink to-purple-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/30 hover:scale-105 transition-transform">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                            </svg>
-                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-white text-brand-pink text-[10px] font-bold rounded-full flex items-center justify-center">3</span>
-                        </button>
+                        <div className="relative">
+                            <button 
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                className="relative w-10 h-10 rounded-xl bg-gradient-to-r from-brand-pink to-purple-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/30 hover:scale-105 transition-transform"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                                {totalAlerts > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-brand-pink text-[10px] font-bold rounded-full flex items-center justify-center">
+                                        {totalAlerts > 9 ? '9+' : totalAlerts}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Notifications Dropdown */}
+                            {showNotifications && (
+                                <>
+                                    {/* Overlay to close dropdown */}
+                                    <div 
+                                        className="fixed inset-0 z-40" 
+                                        onClick={() => setShowNotifications(false)}
+                                    ></div>
+                                    
+                                    <div className="absolute right-0 mt-2 w-96 rounded-2xl shadow-2xl overflow-hidden z-50 border border-[#3d3966]" style={{ backgroundColor: '#221e4a' }}>
+                                    {/* Header */}
+                                    <div className="p-4 border-b border-[#3d3966]" style={{ backgroundColor: '#221e4a' }}>
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-white font-bold flex items-center gap-2">
+                                                <svg className="w-5 h-5 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                                </svg>
+                                                Notifications
+                                            </h3>
+                                            <span className="px-2 py-1 rounded-full text-brand-pink text-xs font-bold" style={{ backgroundColor: '#3d2757' }}>{totalAlerts}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Notifications List */}
+                                    <div className="max-h-96 overflow-y-auto" style={{ backgroundColor: '#221e4a' }}>
+                                        {totalAlerts === 0 ? (
+                                            <div className="p-8 text-center">
+                                                <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <p className="text-dark-muted">Aucune notification</p>
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y divide-[#3d3966]">
+                                                {/* Pneus Critiques */}
+                                                {pneusCritique > 0 && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setActiveSection('pneus');
+                                                            setShowNotifications(false);
+                                                        }}
+                                                        className="w-full p-4 hover:bg-[#2d2957] transition-colors text-left flex items-start gap-3"
+                                                    >
+                                                        <div className="p-2 rounded-lg" style={{ backgroundColor: '#5c2a2a' }}>
+                                                            <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="9" strokeWidth="2"/>
+                                                                <circle cx="12" cy="12" r="4" strokeWidth="2"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-white font-medium text-sm">{pneusCritique} Pneu{pneusCritique > 1 ? 's' : ''} Critique{pneusCritique > 1 ? 's' : ''}</p>
+                                                            <p className="text-dark-muted text-xs mt-1">Usure supérieure à 70%, remplacement urgent requis</p>
+                                                        </div>
+                                                        <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                        </svg>
+                                                    </button>
+                                                )}
+
+                                                {/* Camions en Maintenance */}
+                                                {camionsEnMaintenance > 0 && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setActiveSection('maintenances');
+                                                            setShowNotifications(false);
+                                                        }}
+                                                        className="w-full p-4 hover:bg-[#2d2957] transition-colors text-left flex items-start gap-3"
+                                                    >
+                                                        <div className="p-2 rounded-lg" style={{ backgroundColor: '#5c3a1f' }}>
+                                                            <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-white font-medium text-sm">{camionsEnMaintenance} Camion{camionsEnMaintenance > 1 ? 's' : ''} en Maintenance</p>
+                                                            <p className="text-dark-muted text-xs mt-1">Véhicules indisponibles pour les trajets</p>
+                                                        </div>
+                                                        <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                        </svg>
+                                                    </button>
+                                                )}
+
+                                                {/* Pneus à Surveiller */}
+                                                {pneusASurveiller > 0 && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setActiveSection('pneus');
+                                                            setShowNotifications(false);
+                                                        }}
+                                                        className="w-full p-4 hover:bg-[#2d2957] transition-colors text-left flex items-start gap-3"
+                                                    >
+                                                        <div className="p-2 rounded-lg" style={{ backgroundColor: '#5c501f' }}>
+                                                            <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-white font-medium text-sm">{pneusASurveiller} Pneu{pneusASurveiller > 1 ? 's' : ''} à Surveiller</p>
+                                                            <p className="text-dark-muted text-xs mt-1">Usure entre 40% et 70%, surveillance recommandée</p>
+                                                        </div>
+                                                        <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                        </svg>
+                                                    </button>
+                                                )}
+
+                                                {/* Trajets en Cours */}
+                                                {trajetsEnCours > 0 && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setActiveSection('trajets');
+                                                            setShowNotifications(false);
+                                                        }}
+                                                        className="w-full p-4 hover:bg-[#2d2957] transition-colors text-left flex items-start gap-3"
+                                                    >
+                                                        <div className="p-2 rounded-lg" style={{ backgroundColor: '#1f3a5c' }}>
+                                                            <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-white font-medium text-sm">{trajetsEnCours} Trajet{trajetsEnCours > 1 ? 's' : ''} en Cours</p>
+                                                            <p className="text-dark-muted text-xs mt-1">Livraisons actives sur le terrain</p>
+                                                        </div>
+                                                        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                        </svg>
+                                                    </button>
+                                                )}
+
+                                                {/* Maintenances en Cours */}
+                                                {maintenancesEnCours > 0 && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setActiveSection('maintenances');
+                                                            setShowNotifications(false);
+                                                        }}
+                                                        className="w-full p-4 hover:bg-[#2d2957] transition-colors text-left flex items-start gap-3"
+                                                    >
+                                                        <div className="p-2 rounded-lg" style={{ backgroundColor: '#3d2757' }}>
+                                                            <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-white font-medium text-sm">{maintenancesEnCours} Maintenance{maintenancesEnCours > 1 ? 's' : ''} en Cours</p>
+                                                            <p className="text-dark-muted text-xs mt-1">Opérations de maintenance actives</p>
+                                                        </div>
+                                                        <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                </>
+                            )}
+                        </div>
 
                         {/* Profile */}
                         <div className="flex items-center gap-3">
@@ -416,6 +592,194 @@ const AdminDashboard = () => {
                                                 <span className="text-orange-400 font-semibold">{totalCamions > 0 ? Math.round((camionsEnMaintenance / totalCamions) * 100) : 0}%</span>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Alerts Section */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Urgent Alerts */}
+                                <div className="glass-panel p-6 rounded-2xl">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-white font-semibold flex items-center gap-2">
+                                            <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                            Alertes Urgentes
+                                        </h3>
+                                        <span className="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-bold">
+                                            {pneusCritique + camionsEnMaintenance}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                                        {pneusCritique > 0 && (
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/15 transition-colors">
+                                                <div className="p-2 rounded-lg bg-red-500/20">
+                                                    <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <circle cx="12" cy="12" r="9" strokeWidth="2"/>
+                                                        <circle cx="12" cy="12" r="4" strokeWidth="2"/>
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-white font-medium text-sm">{pneusCritique} Pneu{pneusCritique > 1 ? 's' : ''} Critique{pneusCritique > 1 ? 's' : ''}</p>
+                                                    <p className="text-dark-muted text-xs mt-1">Usure supérieure à 70%, remplacement urgent requis</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setActiveSection('pneus')}
+                                                    className="text-red-400 hover:text-red-300 transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+                                        
+                                        {camionsEnMaintenance > 0 && (
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/15 transition-colors">
+                                                <div className="p-2 rounded-lg bg-orange-500/20">
+                                                    <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-white font-medium text-sm">{camionsEnMaintenance} Camion{camionsEnMaintenance > 1 ? 's' : ''} en Maintenance</p>
+                                                    <p className="text-dark-muted text-xs mt-1">Véhicules indisponibles pour les trajets</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setActiveSection('maintenances')}
+                                                    className="text-orange-400 hover:text-orange-300 transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {pneusASurveiller > 0 && (
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/15 transition-colors">
+                                                <div className="p-2 rounded-lg bg-yellow-500/20">
+                                                    <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01"/>
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-white font-medium text-sm">{pneusASurveiller} Pneu{pneusASurveiller > 1 ? 's' : ''} à Surveiller</p>
+                                                    <p className="text-dark-muted text-xs mt-1">Usure entre 40% et 70%, surveillance recommandée</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setActiveSection('pneus')}
+                                                    className="text-yellow-400 hover:text-yellow-300 transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {pneusCritique === 0 && camionsEnMaintenance === 0 && pneusASurveiller === 0 && (
+                                            <div className="text-center py-8">
+                                                <svg className="w-12 h-12 mx-auto text-green-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <p className="text-dark-muted">Aucune alerte urgente</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Activity Alerts */}
+                                <div className="glass-panel p-6 rounded-2xl">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-white font-semibold flex items-center gap-2">
+                                            <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Activités en Cours
+                                        </h3>
+                                        <span className="px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold">
+                                            {trajetsEnCours + maintenancesEnCours}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                                        {trajetsEnCours > 0 && (
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/15 transition-colors">
+                                                <div className="p-2 rounded-lg bg-blue-500/20">
+                                                    <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-white font-medium text-sm">{trajetsEnCours} Trajet{trajetsEnCours > 1 ? 's' : ''} en Cours</p>
+                                                    <p className="text-dark-muted text-xs mt-1">Livraisons actives sur le terrain</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setActiveSection('trajets')}
+                                                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {maintenancesEnCours > 0 && (
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/15 transition-colors">
+                                                <div className="p-2 rounded-lg bg-purple-500/20">
+                                                    <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-white font-medium text-sm">{maintenancesEnCours} Maintenance{maintenancesEnCours > 1 ? 's' : ''} en Cours</p>
+                                                    <p className="text-dark-muted text-xs mt-1">Opérations de maintenance actives</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setActiveSection('maintenances')}
+                                                    className="text-purple-400 hover:text-purple-300 transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {trajetsPlanifies > 0 && (
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/15 transition-colors">
+                                                <div className="p-2 rounded-lg bg-cyan-500/20">
+                                                    <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-white font-medium text-sm">{trajetsPlanifies} Trajet{trajetsPlanifies > 1 ? 's' : ''} Planifié{trajetsPlanifies > 1 ? 's' : ''}</p>
+                                                    <p className="text-dark-muted text-xs mt-1">Prochaines livraisons à venir</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setActiveSection('trajets')}
+                                                    className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {trajetsEnCours === 0 && maintenancesEnCours === 0 && trajetsPlanifies === 0 && (
+                                            <div className="text-center py-8">
+                                                <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                                </svg>
+                                                <p className="text-dark-muted">Aucune activité en cours</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
