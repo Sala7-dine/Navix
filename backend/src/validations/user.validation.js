@@ -15,6 +15,7 @@ export const updateUserSchema = yup.object({
   email: yup.string().email('Email invalide'),
   password: yup.string().min(8, 'Minimum 8 caractères'),
   role: yup.string().oneOf(['admin', 'chauffeur']),
+  status: yup.boolean(),
 });
 
 export const updateProfileSchema = yup.object({

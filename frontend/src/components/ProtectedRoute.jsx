@@ -10,6 +10,11 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Vérifier si l'utilisateur est actif
+  if (!user.status) {
+    return <Navigate to="/pending" replace />;
+  }
+
   // Si un rôle spécifique est requis, vérifier
   if (requiredRole && user.role !== requiredRole) {
     // Rediriger vers le dashboard approprié selon le rôle

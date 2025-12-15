@@ -32,7 +32,8 @@ export async function register({ email, password, fullName, roles }) {
     const newUser = {
         fullName: user.fullName,
         email: user.email,
-        role : user.role
+        role: user.role,
+        status: user.status
     }
 
     const accessToken = signAccessToken({ sub: user._id, roles: user.role });
@@ -47,6 +48,19 @@ export async function login({ email, password }) {
     const user = await User.findOne({ email });
     if (!user || !(await user.validatePassword(password))) {
       throw new Error('Email ou mot de passe incorrect');
+    }
+
+    // Vérifier si l'utilisateur est actif
+    if (!user.status) {
+      const userResponse = {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        status: user.status
+      };
+      // Retourner les infos sans token pour rediriger vers pending
+      return { user: userResponse, accessToken: null, refreshToken: null, pending: true };
     }
 
     const jti = generateJti();
@@ -65,11 +79,12 @@ export async function login({ email, password }) {
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
-      role: user.role
+      role: user.role,
+      status: user.status
     };
 
     const accessToken = signAccessToken({ sub: user._id, roles: user.roles });
-    return { user: userResponse, accessToken, refreshToken };
+    return { user: userResponse, accessToken, refreshToken, pending: false };
   } catch (err) {
     throw err;
   }

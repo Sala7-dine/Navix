@@ -15,6 +15,15 @@ export async function authenticate(req, res, next) {
     if (!user)
       return res.status(401).json({ error: 'Utilisateur introuvable' });
 
+    // Vérifier si l'utilisateur est actif
+    if (!user.status) {
+      return res.status(403).json({ 
+        error: 'Compte inactif', 
+        message: 'Votre compte est en attente d\'activation par un administrateur',
+        pending: true 
+      });
+    }
+
     req.user = user;
     next();
   } catch {

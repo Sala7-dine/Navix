@@ -221,14 +221,14 @@ const Pneus = () => {
                                             </span>
                                         </td>
                                         <td className="py-4 px-4">
-                                            <div className="text-white font-medium">{pneu.marque}</div>
-                                            <div className="text-dark-muted text-xs">{pneu.modele}</div>
+                                            <div className="text-white font-medium">{pneu.camion?.marque || '-'}</div>
+                                            <div className="text-dark-muted text-xs">{pneu.camion?.modele || '-'}</div>
                                         </td>
                                         <td className="py-4 px-4 text-dark-muted">
                                             {pneu.dateInstallation ? new Date(pneu.dateInstallation).toLocaleDateString('fr-FR') : '-'}
                                         </td>
                                         <td className="py-4 px-4 text-dark-muted">
-                                            {pneu.kilometrageInstallation?.toLocaleString() || 0} km
+                                            {pneu.camion?.kilometrage?.toLocaleString() || '-'}
                                         </td>
                                         <td className="py-4 px-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getUsureColor(pneu.usurePourcentage)}`}>
@@ -287,7 +287,7 @@ const Pneus = () => {
                             </div>
                             <h3 className="text-xl font-bold text-white mb-2">Confirmer la suppression</h3>
                             <p className="text-dark-muted mb-6">
-                                Êtes-vous sûr de vouloir supprimer le pneu <span className="font-semibold text-white">{pneuToDelete?.marque} {pneuToDelete?.modele}</span> ?
+                                Êtes-vous sûr de vouloir supprimer le pneu en position <span className="font-semibold text-white">{getPositionLabel(pneuToDelete?.position)}</span> du camion <span className="font-semibold text-white">{pneuToDelete?.camion?.matricule}</span> ?
                                 Cette action est irréversible.
                             </p>
                             <div className="flex gap-3">

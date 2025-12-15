@@ -46,8 +46,7 @@ pneuSchema.index({ camion: 1, position: 1 });
 // Index pour rechercher les pneus par niveau d'usure
 pneuSchema.index({ usurePourcentage: 1 });
 
-// Middleware pre-remove pour cascade delete (COMPOSITION)
-// Supprimer toutes les maintenances associées quand le pneu est supprimé
+// Middleware pre-remove pour cascade delete
 pneuSchema.pre('deleteOne', { document: true, query: false }, async function () {
   const Maintenance = mongoose.model('Maintenance');
   await Maintenance.deleteMany({ pneu: this._id });

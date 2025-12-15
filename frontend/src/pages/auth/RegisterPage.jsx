@@ -71,6 +71,14 @@ const RegisterPage = () => {
             const { confirmPassword, acceptTerms, ...registerData } = formData;
             const result = await dispatch(register(registerData)).unwrap();
             
+            // Vérifier si l'utilisateur est en attente d'approbation
+            if (!result.user.status) {
+                // Sauvegarder les infos utilisateur pour la page pending
+                localStorage.setItem('NAVIX_USER', JSON.stringify(result.user));
+                navigate('/pending');
+                return;
+            }
+            
             // Redirect based on user role
             if (result.user.role === 'admin') {
                 navigate('/admin/dashboard');

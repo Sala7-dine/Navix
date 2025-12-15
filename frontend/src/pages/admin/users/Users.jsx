@@ -73,6 +73,19 @@ const Users = () => {
     const admins = users.filter(u => u.role === 'admin').length;
     const actifs = users.filter(u => u.status === true).length;
 
+    const handleToggleStatus = async (user) => {
+        try {
+            const newStatus = !user.status;
+            await dispatch(updateUser({ 
+                id: user._id, 
+                data: { status: newStatus }
+            })).unwrap();
+            showNotification(`Utilisateur ${newStatus ? 'activé' : 'désactivé'} avec succès`);
+        } catch (err) {
+            showNotification(err || 'Une erreur est survenue', 'error');
+        }
+    };
+
     const getRoleColor = (role) => {
         switch (role?.toLowerCase()) {
             case 'admin': return 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
@@ -217,9 +230,13 @@ const Users = () => {
                                             </span>
                                         </td>
                                         <td className="py-4 px-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)} text-white`}>
+                                            <button
+                                                onClick={() => handleToggleStatus(user)}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)} text-white hover:opacity-80 transition-opacity cursor-pointer`}
+                                                title={user.status ? 'Cliquez pour désactiver' : 'Cliquez pour activer'}
+                                            >
                                                 {getStatusText(user.status)}
-                                            </span>
+                                            </button>
                                         </td>
                                         <td className="py-4 px-4">
                                             <div className="flex gap-2">

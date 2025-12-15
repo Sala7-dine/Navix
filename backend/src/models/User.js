@@ -43,10 +43,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    status : {
-      type : Boolean,
-      default : false
-    }
+    status: {
+      type: Boolean,
+      default: false, // Par défaut, l'utilisateur est inactif jusqu'à validation admin
+    },
   },
 
   { timestamps: true },

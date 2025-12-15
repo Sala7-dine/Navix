@@ -34,6 +34,13 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // If 403 with pending flag, redirect to pending page
+    if (error.response?.status === 403 && error.response?.data?.pending) {
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      window.location.href = '/pending';
+      return Promise.reject(error);
+    }
+
     // If 401 and not already retried, try to refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
