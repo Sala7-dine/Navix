@@ -90,17 +90,17 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xl flex items-center justify-center z-50 p-4">
-            <div className="bg-[#252140]/95 backdrop-blur-2xl rounded-3xl p-8 max-w-2xl w-full mx-4 border border-white/10 max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="glass-panel p-8 max-w-2xl w-full mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-white">
                         {fuelLog ? 'Modifier Log Carburant' : 'Nouveau Log Carburant'}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -110,16 +110,16 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Trajet */}
                         <div className="md:col-span-2">
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Trajet <span className="text-red-400">*</span>
                             </label>
                             <select
                                 name="trajet"
                                 value={formData.trajet}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.trajet ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.trajet ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                             >
                                 <option value="">Sélectionner un trajet</option>
                                 {trajets.map(trajet => (
@@ -133,7 +133,7 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
 
                         {/* Volume en Litres */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Volume (Litres) <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -143,9 +143,9 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
                                 onChange={handleChange}
                                 step="0.01"
                                 min="0"
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.volumeLitres ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.volumeLitres ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                                 placeholder="Ex: 150.50"
                             />
                             {errors.volumeLitres && <p className="text-red-400 text-sm mt-1">{errors.volumeLitres}</p>}
@@ -153,7 +153,7 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
 
                         {/* Prix Total */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Prix Total (DH) <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -163,9 +163,9 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
                                 onChange={handleChange}
                                 step="0.01"
                                 min="0"
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.prixTotal ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.prixTotal ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                                 placeholder="Ex: 1800.00"
                             />
                             {errors.prixTotal && <p className="text-red-400 text-sm mt-1">{errors.prixTotal}</p>}
@@ -173,17 +173,17 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
 
                         {/* Prix par Litre (Calculé automatiquement) */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Prix par Litre (DH)
                             </label>
-                            <div className="w-full px-4 py-3 bg-[#1a1633]/40 text-gray-400 rounded-xl border border-white/10">
+                            <div className="w-full px-4 py-3 glass-card text-dark-muted rounded-lg">
                                 {prixParLitre} DH/L
                             </div>
                         </div>
 
                         {/* Date */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Date <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -191,16 +191,16 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
                                 name="date"
                                 value={formData.date}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.date ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.date ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                             />
                             {errors.date && <p className="text-red-400 text-sm mt-1">{errors.date}</p>}
                         </div>
 
                         {/* Lieu Station */}
                         <div className="md:col-span-2">
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Lieu de la Station
                             </label>
                             <input
@@ -208,14 +208,14 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
                                 name="lieuStation"
                                 value={formData.lieuStation}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                                 placeholder="Ex: Station Total - Casablanca"
                             />
                         </div>
 
                         {/* Remarques */}
                         <div className="md:col-span-2">
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Remarques
                             </label>
                             <textarea
@@ -224,7 +224,7 @@ const FuelLogModal = ({ isOpen, onClose, onSubmit, fuelLog, loading }) => {
                                 onChange={handleChange}
                                 rows="3"
                                 maxLength="500"
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all resize-none"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 resize-none"
                                 placeholder="Remarques additionnelles..."
                             />
                             <div className="text-xs text-gray-500 mt-1 text-right">

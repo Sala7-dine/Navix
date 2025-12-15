@@ -139,17 +139,17 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xl flex items-center justify-center z-50 p-4">
-            <div className="bg-[#252140]/95 backdrop-blur-2xl rounded-3xl p-8 max-w-4xl w-full mx-4 border border-white/10 max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="glass-panel p-8 max-w-4xl w-full mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-white">
                         {maintenance ? 'Modifier Maintenance' : 'Nouvelle Maintenance'}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -159,16 +159,16 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Type */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Type <span className="text-red-400">*</span>
                             </label>
                             <select
                                 name="type"
                                 value={formData.type}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.type ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.type ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                             >
                                 <option value="">Sélectionner un type</option>
                                 {typeOptions.map(option => (
@@ -180,14 +180,14 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
 
                         {/* Statut */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Statut <span className="text-red-400">*</span>
                             </label>
                             <select
                                 name="statut"
                                 value={formData.statut}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                             >
                                 {statutOptions.map(option => (
                                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -197,16 +197,16 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
 
                         {/* Camion */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Camion {!formData.pneu && <span className="text-red-400">*</span>}
                             </label>
                             <select
                                 name="camion"
                                 value={formData.camion}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.camion ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.camion ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                             >
                                 <option value="">Aucun camion</option>
                                 {camions.map(camion => (
@@ -220,16 +220,16 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
 
                         {/* Pneu */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Pneu {formData.type === 'PNEU' && <span className="text-red-400">*</span>}
                             </label>
                             <select
                                 name="pneu"
                                 value={formData.pneu}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.pneu ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.pneu ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                             >
                                 <option value="">Aucun pneu</option>
                                 {pneus.map(pneu => (
@@ -243,7 +243,7 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
 
                         {/* Coût */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Coût (DH) <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -253,9 +253,9 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                                 onChange={handleChange}
                                 step="0.01"
                                 min="0"
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.cout ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.cout ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                                 placeholder="Ex: 1500.00"
                             />
                             {errors.cout && <p className="text-red-400 text-sm mt-1">{errors.cout}</p>}
@@ -263,7 +263,7 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
 
                         {/* Date */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Date <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -271,16 +271,16 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                                 name="date"
                                 value={formData.date}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.date ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.date ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                }`}
                             />
                             {errors.date && <p className="text-red-400 text-sm mt-1">{errors.date}</p>}
                         </div>
 
                         {/* Garage */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Garage
                             </label>
                             <input
@@ -288,14 +288,14 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                                 name="garage"
                                 value={formData.garage}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                                 placeholder="Ex: Garage Auto Service"
                             />
                         </div>
 
                         {/* Technicien */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Technicien
                             </label>
                             <input
@@ -303,14 +303,14 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                                 name="technicien"
                                 value={formData.technicien}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                                 placeholder="Ex: Ahmed Benani"
                             />
                         </div>
 
                         {/* Kilométrage */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Kilométrage
                             </label>
                             <input
@@ -319,14 +319,14 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                                 value={formData.kilometrage}
                                 onChange={handleChange}
                                 min="0"
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                                 placeholder="Ex: 125000"
                             />
                         </div>
 
                         {/* Prochain Entretien */}
                         <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Prochain Entretien
                             </label>
                             <input
@@ -334,13 +334,13 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                                 name="prochainEntretien"
                                 value={formData.prochainEntretien}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                             />
                         </div>
 
                         {/* Description */}
                         <div className="md:col-span-2">
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Description <span className="text-red-400">*</span>
                             </label>
                             <textarea
@@ -350,9 +350,9 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                                 rows="3"
                                 minLength="10"
                                 maxLength="1000"
-                                className={`w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border ${
-                                    errors.description ? 'border-red-500' : 'border-white/10'
-                                } focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all resize-none`}
+                                className={`w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 ${
+                                    errors.description ? 'ring-2 ring-red-500' : 'focus:ring-brand-cyan/50'
+                                } resize-none`}
                                 placeholder="Description détaillée de la maintenance (min 10 caractères)..."
                             />
                             <div className="flex justify-between items-center mt-1">
@@ -365,7 +365,7 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
 
                         {/* Remarques */}
                         <div className="md:col-span-2">
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
+                            <label className="block text-sm font-medium text-dark-muted mb-2">
                                 Remarques
                             </label>
                             <textarea
@@ -373,7 +373,7 @@ const MaintenanceModal = ({ isOpen, onClose, onSubmit, maintenance, loading }) =
                                 value={formData.remarques}
                                 onChange={handleChange}
                                 rows="2"
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:bg-[#1a1633]/80 focus:border-brand-cyan/50 transition-all resize-none"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 resize-none"
                                 placeholder="Remarques additionnelles..."
                             />
                         </div>

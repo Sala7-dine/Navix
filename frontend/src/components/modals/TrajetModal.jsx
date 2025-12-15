@@ -71,17 +71,17 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading, error }) => {
     const chauffeurs = users.filter(u => u.role === 'chauffeur');
 
     return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xl flex items-center justify-center z-50 p-4">
-            <div className="bg-[#252140]/95 backdrop-blur-2xl rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
-                <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="glass-panel p-6 max-w-2xl w-full mx-4 rounded-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-white">
                         {trajet ? 'Modifier le trajet' : 'Ajouter un trajet'}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -93,7 +93,7 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading, error }) => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-gray-400 text-sm font-medium mb-2">
@@ -204,18 +204,18 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading, error }) => {
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            rows="3"
+                            rows="2"
                             maxLength="1000"
                             className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all resize-none"
                             placeholder="Description du trajet..."
                         />
                     </div>
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex gap-3 pt-3">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-6 py-3 bg-[#1a1633]/60 text-white rounded-xl font-medium hover:bg-[#1a1633]/80 transition-colors border border-white/10"
+                            className="flex-1 px-5 py-2.5 bg-[#1a1633]/60 text-white rounded-xl font-medium hover:bg-[#1a1633]/80 transition-colors border border-white/10"
                             disabled={loading}
                         >
                             Annuler
@@ -223,7 +223,7 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading, error }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 px-6 py-3 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 px-5 py-2.5 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Chargement...' : trajet ? 'Modifier' : 'Ajouter'}
                         </button>

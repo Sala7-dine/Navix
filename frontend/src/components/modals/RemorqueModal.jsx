@@ -61,25 +61,23 @@ const RemorqueModal = ({ isOpen, onClose, onSubmit, remorque, loading, error }) 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl">
-            <div className="bg-[#252140]/95 backdrop-blur-2xl rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-white/10">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="glass-panel p-8 max-w-2xl w-full mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-white">
                         {remorque ? 'Modifier la Remorque' : 'Nouvelle Remorque'}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-lg"
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Row 1 - Matricule, Type */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -109,7 +107,7 @@ const RemorqueModal = ({ isOpen, onClose, onSubmit, remorque, loading, error }) 
                                 name="type"
                                 value={formData.type}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 transition-all"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                             >
                                 <option value="FRIGORIFIQUE">Frigorifique</option>
                                 <option value="BENNE">Benne</option>
