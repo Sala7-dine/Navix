@@ -9,13 +9,13 @@ export const createFuelLog = async (fuelLogData) => {
             throw new Error('Trajet introuvable');
         }
         
-        // Vérifier que le trajet est en cours
-        if (trajet.statut !== 'EN_COURS') {
-            throw new Error('Le trajet doit être en cours pour ajouter un ravitaillement');
+        // Vérifier que le trajet est en cours ou terminé
+        if (trajet.statut !== 'EN_COURS' && trajet.statut !== 'TERMINE') {
+            throw new Error('Le trajet doit être en cours ou terminé pour ajouter un ravitaillement');
         }
         
         const fuelLog = await FuelLog.create(fuelLogData);
-        return await fuelLog.populate('trajet', 'destination pointDepart statut');
+        return await fuelLog.populate('trajet', 'lieuArrivee lieuDepart statut');
     } catch(err) {
         throw new Error(err.message);
     }
@@ -26,7 +26,7 @@ export const getAllFuelLogs = async (filters = {}) => {
         const fuelLogs = await FuelLog.find(filters)
             .populate({
                 path: 'trajet',
-                select: 'destination pointDepart dateDepart statut',
+                select: 'lieuArrivee lieuDepart dateDepart statut',
                 populate: {
                     path: 'camion',
                     select: 'matricule marque modele'
@@ -44,7 +44,7 @@ export const getFuelLogById = async (id) => {
         const fuelLog = await FuelLog.findById(id)
             .populate({
                 path: 'trajet',
-                select: 'destination pointDepart dateDepart statut kilometrageDepart',
+                select: 'lieuArrivee lieuDepart dateDepart statut kilometrageDepart',
                 populate: {
                     path: 'camion',
                     select: 'matricule marque modele kilometrageActuel'
@@ -77,7 +77,7 @@ export const updateFuelLog = async (id, updateData) => {
             { $set: updateData },
             { new: true, runValidators: true }
         )
-        .populate('trajet', 'destination pointDepart statut');
+        .populate('trajet', 'lieuArrivee lieuDepart statut');
         
         if (!fuelLog) {
             throw new Error('Ravitaillement introuvable');
@@ -144,7 +144,7 @@ export const getConsommationMoyenneByCamion = async (camionId, dateDebut, dateFi
         
         // Calculer la consommation totale
         const fuelLogs = await FuelLog.find({ trajet: { $in: trajetIds } });
-        const totalCarburant = fuelLogs.reduce((sum, log) => sum + log.quantiteLitres, 0);
+        const totalCarburant = fuelLogs.reduce((sum, log) => sum + log.volumeLitres, 0);
         
         // Calculer la distance totale
         const trajetsComplets = await Trajet.find({ _id: { $in: trajetIds } })

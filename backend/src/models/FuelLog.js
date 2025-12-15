@@ -48,11 +48,10 @@ fuelLogSchema.index({ trajet: 1, date: -1 });
 fuelLogSchema.index({ date: -1 });
 
 // Middleware pre-save pour calculer automatiquement le prix par litre
-fuelLogSchema.pre('save', function (next) {
+fuelLogSchema.pre('save', function () {
   if (this.volumeLitres > 0 && this.prixTotal >= 0) {
     this.prixParLitre = this.prixTotal / this.volumeLitres;
   }
-  next();
 });
 
 // Virtual pour obtenir les informations du trajet

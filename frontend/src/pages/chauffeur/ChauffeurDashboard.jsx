@@ -7,6 +7,7 @@ import ChauffeurSidebar from '../../components/layout/ChauffeurSidebar';
 import MesTrajets from './MesTrajets';
 import Historique from './Historique';
 import MonProfil from './MonProfil';
+import MesFuelLogs from './MesFuelLogs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
 import './ChauffeurDashboard.css';
@@ -123,6 +124,8 @@ const ChauffeurDashboard = () => {
                 return <MesTrajets />;
             case 'historique':
                 return <Historique />;
+            case 'fuel-logs':
+                return <MesFuelLogs />;
             case 'mon-profil':
                 return <MonProfil />;
             case 'dashboard':
@@ -437,6 +440,7 @@ const ChauffeurDashboard = () => {
                             {activeSection === 'dashboard' && 'Dashboard'}
                             {activeSection === 'mes-trajets' && 'Mes Trajets'}
                             {activeSection === 'historique' && 'Historique'}
+                            {activeSection === 'fuel-logs' && 'Mes Ravitaillements'}
                             {activeSection === 'mon-profil' && 'Mon Profil'}
                         </h1>
                         {activeSection === 'dashboard' && (
