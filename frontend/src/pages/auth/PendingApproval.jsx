@@ -1,13 +1,25 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../features/auth/authSlice';
 import { STORAGE_KEYS } from '../../config/constants';
 
 const PendingApproval = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/login');
+    const handleLogout = async () => {
+        try {
+            // Déconnecter via Redux
+            await dispatch(logout()).unwrap();
+        } catch (error) {
+            // Ignorer les erreurs de déconnexion
+        } finally {
+            // Nettoyer complètement le localStorage
+            localStorage.clear();
+            // Forcer la redirection vers login
+            window.location.href = '/login';
+        }
     };
 
     // Récupérer les infos de l'utilisateur du localStorage
