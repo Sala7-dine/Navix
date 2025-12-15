@@ -10,7 +10,6 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
         chauffeur: '',
         camion: '',
         remorque: '',
-        statut: 'PLANIFIE',
         lieuDepart: '',
         lieuArrivee: '',
         kilometrageDepart: '',
@@ -27,7 +26,6 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
                 chauffeur: trajet.chauffeur?._id || trajet.chauffeur || '',
                 camion: trajet.camion?._id || trajet.camion || '',
                 remorque: trajet.remorque?._id || trajet.remorque || '',
-                statut: trajet.statut || 'PLANIFIE',
                 lieuDepart: trajet.lieuDepart || '',
                 lieuArrivee: trajet.lieuArrivee || '',
                 kilometrageDepart: trajet.kilometrageDepart || '',
@@ -42,7 +40,6 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
                 chauffeur: '',
                 camion: '',
                 remorque: '',
-                statut: 'PLANIFIE',
                 lieuDepart: '',
                 lieuArrivee: '',
                 kilometrageDepart: '',
@@ -156,42 +153,23 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
-                                Remorque
-                            </label>
-                            <select
-                                name="remorque"
-                                value={formData.remorque}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all"
-                            >
-                                <option value="">Sans remorque</option>
-                                {remorques.map(remorque => (
-                                    <option key={remorque._id} value={remorque._id}>
-                                        {remorque.matricule} - {remorque.type}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
-                                Statut
-                            </label>
-                            <select
-                                name="statut"
-                                value={formData.statut}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all"
-                            >
-                                <option value="PLANIFIE">Planifié</option>
-                                <option value="EN_COURS">En cours</option>
-                                <option value="TERMINE">Terminé</option>
-                                <option value="ANNULE">Annulé</option>
-                            </select>
-                        </div>
+                    <div>
+                        <label className="block text-gray-400 text-sm font-medium mb-2">
+                            Remorque
+                        </label>
+                        <select
+                            name="remorque"
+                            value={formData.remorque}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all"
+                        >
+                            <option value="">Sans remorque</option>
+                            {remorques.map(remorque => (
+                                <option key={remorque._id} value={remorque._id}>
+                                    {remorque.matricule} - {remorque.type}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

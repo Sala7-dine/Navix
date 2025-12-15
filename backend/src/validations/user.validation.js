@@ -24,4 +24,3 @@ export const updateProfileSchema = yup.object({
   password: yup.string().min(8, 'Minimum 8 caractères').optional(),
   profileImage: yup.string().optional(),
 });
- 

@@ -4,8 +4,7 @@ const RemorqueModal = ({ isOpen, onClose, onSubmit, remorque, loading }) => {
     const [formData, setFormData] = useState({
         matricule: '',
         type: 'FRIGORIFIQUE',
-        capacite: 0,
-        status: 'DISPONIBLE'
+        capacite: 0
     });
 
     const [errors, setErrors] = useState({});
@@ -15,15 +14,13 @@ const RemorqueModal = ({ isOpen, onClose, onSubmit, remorque, loading }) => {
             setFormData({
                 matricule: remorque.matricule || '',
                 type: remorque.type || 'FRIGORIFIQUE',
-                capacite: remorque.capacite || 0,
-                status: remorque.status || 'DISPONIBLE'
+                capacite: remorque.capacite || 0
             });
         } else {
             setFormData({
                 matricule: '',
                 type: 'FRIGORIFIQUE',
-                capacite: 0,
-                status: 'DISPONIBLE'
+                capacite: 0
             });
         }
         setErrors({});
@@ -143,22 +140,6 @@ const RemorqueModal = ({ isOpen, onClose, onSubmit, remorque, loading }) => {
                             {errors.capacite && (
                                 <p className="mt-1 text-sm text-red-400">{errors.capacite}</p>
                             )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2">
-                                Status
-                            </label>
-                            <select
-                                name="status"
-                                value={formData.status}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:outline-none focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 transition-all"
-                            >
-                                <option value="DISPONIBLE">Disponible</option>
-                                <option value="EN_MISSION">En Mission</option>
-                                <option value="EN_TRAJET">En Trajet</option>
-                            </select>
                         </div>
                     </div>
 

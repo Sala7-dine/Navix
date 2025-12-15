@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { fuelLogsService, trajetsService } from '../../services/api';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchFuelLogs, createFuelLog } from '../../features/fuelLogs/fuelLogsSlice';
+import { fetchMesTrajets } from '../../features/trajets/trajetsSlice';
 
 const MesFuelLogs = () => {
+    const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
-    const [fuelLogs, setFuelLogs] = useState([]);
-    const [mesTrajets, setMesTrajets] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
+    const { fuelLogs: allFuelLogs, loading } = useSelector((state) => state.fuelLogs);
+    const { trajets: mesTrajets } = useSelector((state) => state.trajets);
+    
     const [notification, setNotification] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         trajet: '',
@@ -20,34 +22,15 @@ const MesFuelLogs = () => {
     });
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        dispatch(fetchFuelLogs());
+        dispatch(fetchMesTrajets());
+    }, [dispatch]);
 
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            // Récupérer mes trajets
-            const trajetsResponse = await trajetsService.getMesTrajets();
-            setMesTrajets(trajetsResponse.data || []);
-
-            // Récupérer tous les fuel logs et filtrer ceux de mes trajets
-            const fuelLogsResponse = await fuelLogsService.getAll();
-            const allFuelLogs = fuelLogsResponse.data || [];
-            
-            // Filtrer les fuel logs pour ne garder que ceux de mes trajets
-            const trajetIds = (trajetsResponse.data || []).map(t => t._id);
-            const myFuelLogs = allFuelLogs.filter(log => 
-                trajetIds.includes(log.trajet?._id)
-            );
-            
-            setFuelLogs(myFuelLogs);
-        } catch (error) {
-            console.error('Erreur chargement:', error);
-            showNotification('Erreur lors du chargement des données', 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Filtrer les fuel logs pour ne garder que ceux de mes trajets
+    const trajetIds = (mesTrajets || []).map(t => t._id);
+    const fuelLogs = (allFuelLogs || []).filter(log => 
+        trajetIds.includes(log.trajet?._id)
+    );
 
     const showNotification = (message, type = 'success') => {
         setNotification({ message, type });
@@ -72,22 +55,21 @@ const MesFuelLogs = () => {
 
         try {
             setSubmitting(true);
-            await fuelLogsService.create({
+            await dispatch(createFuelLog({
                 trajet: formData.trajet,
                 volumeLitres: Number(formData.volumeLitres),
                 prixTotal: Number(formData.prixTotal),
                 date: formData.date,
                 lieuStation: formData.lieuStation,
                 remarques: formData.remarques
-            });
+            })).unwrap();
 
             showNotification('Ravitaillement enregistré avec succès !', 'success');
             setShowModal(false);
             resetForm();
-            fetchData();
         } catch (error) {
             console.error('Erreur création:', error);
-            showNotification(error.response?.data?.message || 'Erreur lors de l\'enregistrement', 'error');
+            showNotification(error || 'Erreur lors de l\'enregistrement', 'error');
         } finally {
             setSubmitting(false);
         }
