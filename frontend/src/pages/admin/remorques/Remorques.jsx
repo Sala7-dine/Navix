@@ -13,6 +13,7 @@ const Remorques = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [remorqueToDelete, setRemorqueToDelete] = useState(null);
     const [notification, setNotification] = useState(null);
+    const [modalError, setModalError] = useState(null);
 
     useEffect(() => {
         dispatch(fetchRemorques());
@@ -25,6 +26,7 @@ const Remorques = () => {
 
     const handleSubmit = async (remorqueData) => {
         try {
+            setModalError(null);
             if (selectedRemorque) {
                 await dispatch(updateRemorque({ 
                     id: selectedRemorque._id, 
@@ -38,12 +40,13 @@ const Remorques = () => {
             setIsModalOpen(false);
             setSelectedRemorque(null);
         } catch (err) {
-            showNotification(err || 'Une erreur est survenue', 'error');
+            setModalError(err || 'Une erreur est survenue');
         }
     };
 
     const handleEdit = (remorque) => {
         setSelectedRemorque(remorque);
+        setModalError(null);
         setIsModalOpen(true);
     };
 
@@ -65,6 +68,7 @@ const Remorques = () => {
 
     const handleAddNew = () => {
         setSelectedRemorque(null);
+        setModalError(null);
         setIsModalOpen(true);
     };
 
@@ -241,10 +245,12 @@ const Remorques = () => {
                 onClose={() => {
                     setIsModalOpen(false);
                     setSelectedRemorque(null);
+                    setModalError(null);
                 }}
                 onSubmit={handleSubmit}
                 remorque={selectedRemorque}
                 loading={loading}
+                error={modalError}
             />
 
             {showDeleteConfirm && (

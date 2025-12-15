@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading }) => {
+const CamionModal = ({ isOpen, onClose, onSubmit, camion, loading, error }) => {
     const [formData, setFormData] = useState({
         matricule: '',
         marque: '',

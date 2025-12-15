@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
+const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading, error }) => {
     const { users } = useSelector((state) => state.users);
     const { camions } = useSelector((state) => state.camions);
     const { remorques } = useSelector((state) => state.remorques);
@@ -12,12 +12,8 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
         remorque: '',
         lieuDepart: '',
         lieuArrivee: '',
-        kilometrageDepart: '',
-        kilometrageArrivee: '',
         dateDepart: '',
-        dateArrivee: '',
-        remarques: '',
-        volumeGasoilRestant: ''
+        description: ''
     });
 
     useEffect(() => {
@@ -28,12 +24,8 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
                 remorque: trajet.remorque?._id || trajet.remorque || '',
                 lieuDepart: trajet.lieuDepart || '',
                 lieuArrivee: trajet.lieuArrivee || '',
-                kilometrageDepart: trajet.kilometrageDepart || '',
-                kilometrageArrivee: trajet.kilometrageArrivee || '',
                 dateDepart: trajet.dateDepart ? new Date(trajet.dateDepart).toISOString().slice(0, 16) : '',
-                dateArrivee: trajet.dateArrivee ? new Date(trajet.dateArrivee).toISOString().slice(0, 16) : '',
-                remarques: trajet.remarques || '',
-                volumeGasoilRestant: trajet.volumeGasoilRestant || ''
+                description: trajet.description || trajet.remarques || ''
             });
         } else {
             setFormData({
@@ -42,12 +34,8 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
                 remorque: '',
                 lieuDepart: '',
                 lieuArrivee: '',
-                kilometrageDepart: '',
-                kilometrageArrivee: '',
                 dateDepart: '',
-                dateArrivee: '',
-                remarques: '',
-                volumeGasoilRestant: ''
+                description: ''
             });
         }
     }, [trajet]);
@@ -65,28 +53,15 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
         
         // Validation
         if (!formData.chauffeur || !formData.camion || !formData.lieuDepart || 
-            !formData.lieuArrivee || !formData.kilometrageDepart || !formData.dateDepart) {
+            !formData.lieuArrivee || !formData.dateDepart) {
             alert('Veuillez remplir tous les champs requis');
-            return;
-        }
-
-        if (formData.kilometrageDepart < 0) {
-            alert('Le kilométrage de départ doit être positif');
-            return;
-        }
-
-        if (formData.kilometrageArrivee && formData.kilometrageArrivee < formData.kilometrageDepart) {
-            alert('Le kilométrage d\'arrivée doit être supérieur au kilométrage de départ');
             return;
         }
 
         // Prepare data - remove empty fields
         const dataToSubmit = { ...formData };
         if (!dataToSubmit.remorque) delete dataToSubmit.remorque;
-        if (!dataToSubmit.kilometrageArrivee) delete dataToSubmit.kilometrageArrivee;
-        if (!dataToSubmit.dateArrivee) delete dataToSubmit.dateArrivee;
-        if (!dataToSubmit.remarques) delete dataToSubmit.remarques;
-        if (!dataToSubmit.volumeGasoilRestant) delete dataToSubmit.volumeGasoilRestant;
+        if (!dataToSubmit.description) delete dataToSubmit.description;
 
         onSubmit(dataToSubmit);
     };
@@ -111,6 +86,12 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
                         </svg>
                     </button>
                 </div>
+
+                {error && (
+                    <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm">
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid grid-cols-2 gap-4">
@@ -202,93 +183,31 @@ const TrajetModal = ({ isOpen, onClose, onSubmit, trajet, loading }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
-                                Kilométrage départ (km) *
-                            </label>
-                            <input
-                                type="number"
-                                name="kilometrageDepart"
-                                value={formData.kilometrageDepart}
-                                onChange={handleChange}
-                                min="0"
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all"
-                                placeholder="Ex: 15000"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
-                                Kilométrage arrivée (km)
-                            </label>
-                            <input
-                                type="number"
-                                name="kilometrageArrivee"
-                                value={formData.kilometrageArrivee}
-                                onChange={handleChange}
-                                min="0"
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all"
-                                placeholder="Ex: 15250"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
-                                Date de départ *
-                            </label>
-                            <input
-                                type="datetime-local"
-                                name="dateDepart"
-                                value={formData.dateDepart}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-gray-400 text-sm font-medium mb-2">
-                                Date d'arrivée
-                            </label>
-                            <input
-                                type="datetime-local"
-                                name="dateArrivee"
-                                value={formData.dateArrivee}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all"
-                            />
-                        </div>
-                    </div>
-
                     <div>
                         <label className="block text-gray-400 text-sm font-medium mb-2">
-                            Volume gasoil restant (L)
+                            Date de départ *
                         </label>
                         <input
-                            type="number"
-                            name="volumeGasoilRestant"
-                            value={formData.volumeGasoilRestant}
+                            type="datetime-local"
+                            name="dateDepart"
+                            value={formData.dateDepart}
                             onChange={handleChange}
-                            min="0"
                             className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all"
-                            placeholder="Ex: 100"
                         />
                     </div>
 
                     <div>
                         <label className="block text-gray-400 text-sm font-medium mb-2">
-                            Remarques
+                            Description
                         </label>
                         <textarea
-                            name="remarques"
-                            value={formData.remarques}
+                            name="description"
+                            value={formData.description}
                             onChange={handleChange}
                             rows="3"
                             maxLength="1000"
                             className="w-full px-4 py-3 bg-[#1a1633]/60 text-white rounded-xl border border-white/10 focus:border-brand-cyan/50 focus:bg-[#1a1633]/80 focus:outline-none transition-all resize-none"
-                            placeholder="Remarques sur le trajet..."
+                            placeholder="Description du trajet..."
                         />
                     </div>
 

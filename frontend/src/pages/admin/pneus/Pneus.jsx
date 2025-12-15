@@ -14,6 +14,7 @@ const Pneus = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [pneuToDelete, setPneuToDelete] = useState(null);
     const [notification, setNotification] = useState(null);
+    const [modalError, setModalError] = useState(null);
 
     useEffect(() => {
         dispatch(fetchPneus());
@@ -27,6 +28,7 @@ const Pneus = () => {
 
     const handleSubmit = async (pneuData) => {
         try {
+            setModalError(null);
             if (selectedPneu) {
                 await dispatch(updatePneu({ 
                     id: selectedPneu._id, 
@@ -40,12 +42,13 @@ const Pneus = () => {
             setIsModalOpen(false);
             setSelectedPneu(null);
         } catch (err) {
-            showNotification(err || 'Une erreur est survenue', 'error');
+            setModalError(err || 'Une erreur est survenue');
         }
     };
 
     const handleEdit = (pneu) => {
         setSelectedPneu(pneu);
+        setModalError(null);
         setIsModalOpen(true);
     };
 
@@ -67,6 +70,7 @@ const Pneus = () => {
 
     const handleAddNew = () => {
         setSelectedPneu(null);
+        setModalError(null);
         setIsModalOpen(true);
     };
 
@@ -270,10 +274,12 @@ const Pneus = () => {
                 onClose={() => {
                     setIsModalOpen(false);
                     setSelectedPneu(null);
+                    setModalError(null);
                 }}
                 onSubmit={handleSubmit}
                 pneu={selectedPneu}
                 loading={loading}
+                error={modalError}
             />
 
             {showDeleteConfirm && (

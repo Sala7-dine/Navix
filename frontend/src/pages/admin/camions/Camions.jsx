@@ -13,6 +13,7 @@ const Camions = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [camionToDelete, setCamionToDelete] = useState(null);
     const [notification, setNotification] = useState(null);
+    const [modalError, setModalError] = useState(null);
 
     // Fetch camions on mount
     useEffect(() => {
@@ -28,6 +29,7 @@ const Camions = () => {
     // Handle create/update submit
     const handleSubmit = async (formData) => {
         try {
+            setModalError(null);
             if (selectedCamion) {
                 await dispatch(updateCamion({ id: selectedCamion._id, data: formData })).unwrap();
                 showNotification('Camion modifié avec succès');
@@ -38,13 +40,14 @@ const Camions = () => {
             setIsModalOpen(false);
             setSelectedCamion(null);
         } catch (err) {
-            showNotification(err.message || 'Une erreur est survenue', 'error');
+            setModalError(err.message || err || 'Une erreur est survenue');
         }
     };
 
     // Handle edit
     const handleEdit = (camion) => {
         setSelectedCamion(camion);
+        setModalError(null);
         setIsModalOpen(true);
     };
 
@@ -69,6 +72,7 @@ const Camions = () => {
     // Handle add new
     const handleAddNew = () => {
         setSelectedCamion(null);
+        setModalError(null);
         setIsModalOpen(true);
     };
 
@@ -315,10 +319,12 @@ const Camions = () => {
                 onClose={() => {
                     setIsModalOpen(false);
                     setSelectedCamion(null);
+                    setModalError(null);
                 }}
                 onSubmit={handleSubmit}
                 camion={selectedCamion}
                 loading={loading}
+                error={modalError}
             />
 
             {/* Delete Confirmation Dialog */}

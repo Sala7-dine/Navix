@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading }) => {
+const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading, error }) => {
     const { camions } = useSelector((state) => state.camions);
     
     const [formData, setFormData] = useState({
@@ -9,12 +9,9 @@ const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading }) => {
         position: 'AVANT_GAUCHE',
         marque: '',
         modele: '',
-        numeroSerie: '',
-        dateInstallation: '',
-        kilometrageInstallation: '',
+        usure: 0,
         pression: '',
-        profondeurSculpture: '',
-        usurePourcentage: 0
+        dateMontage: ''
     });
 
     useEffect(() => {
@@ -24,12 +21,10 @@ const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading }) => {
                 position: pneu.position || 'AVANT_GAUCHE',
                 marque: pneu.marque || '',
                 modele: pneu.modele || '',
-                numeroSerie: pneu.numeroSerie || '',
-                dateInstallation: pneu.dateInstallation ? new Date(pneu.dateInstallation).toISOString().split('T')[0] : '',
-                kilometrageInstallation: pneu.kilometrageInstallation || '',
+                usure: pneu.usure || pneu.usurePourcentage || 0,
                 pression: pneu.pression || '',
-                profondeurSculpture: pneu.profondeurSculpture || '',
-                usurePourcentage: pneu.usurePourcentage || 0
+                dateMontage: pneu.dateMontage ? new Date(pneu.dateMontage).toISOString().split('T')[0] : 
+                             pneu.dateInstallation ? new Date(pneu.dateInstallation).toISOString().split('T')[0] : ''
             });
         } else {
             setFormData({
@@ -37,12 +32,9 @@ const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading }) => {
                 position: 'AVANT_GAUCHE',
                 marque: '',
                 modele: '',
-                numeroSerie: '',
-                dateInstallation: '',
-                kilometrageInstallation: '',
+                usure: 0,
                 pression: '',
-                profondeurSculpture: '',
-                usurePourcentage: 0
+                dateMontage: ''
             });
         }
     }, [pneu]);
@@ -78,6 +70,12 @@ const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading }) => {
                         </svg>
                     </button>
                 </div>
+
+                {error && (
+                    <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm">
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -149,54 +147,25 @@ const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading }) => {
                                 value={formData.modele}
                                 onChange={handleChange}
                                 required
-                                placeholder="Ex: XZE 295/80R22.5"
+                                placeholder="Ex: XZE 2+"
                                 className="w-full px-4 py-3 glass-card rounded-lg text-white placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                             />
                         </div>
 
-                        {/* Numéro de Série */}
+                        {/* Usure */}
                         <div>
                             <label className="block text-sm font-medium text-dark-muted mb-2">
-                                Numéro de Série
-                            </label>
-                            <input
-                                type="text"
-                                name="numeroSerie"
-                                value={formData.numeroSerie}
-                                onChange={handleChange}
-                                placeholder="Ex: DOT XXXX"
-                                className="w-full px-4 py-3 glass-card rounded-lg text-white placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
-                            />
-                        </div>
-
-                        {/* Date d'Installation */}
-                        <div>
-                            <label className="block text-sm font-medium text-dark-muted mb-2">
-                                Date d'Installation <span className="text-red-400">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                name="dateInstallation"
-                                value={formData.dateInstallation}
-                                onChange={handleChange}
-                                required
-                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
-                            />
-                        </div>
-
-                        {/* Kilométrage Installation */}
-                        <div>
-                            <label className="block text-sm font-medium text-dark-muted mb-2">
-                                Kilométrage Installation <span className="text-red-400">*</span>
+                                Usure (%) <span className="text-red-400">*</span>
                             </label>
                             <input
                                 type="number"
-                                name="kilometrageInstallation"
-                                value={formData.kilometrageInstallation}
+                                name="usure"
+                                value={formData.usure}
                                 onChange={handleChange}
                                 required
                                 min="0"
-                                placeholder="Ex: 50000"
+                                max="100"
+                                placeholder="Ex: 10"
                                 className="w-full px-4 py-3 glass-card rounded-lg text-white placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                             />
                         </div>
@@ -204,13 +173,14 @@ const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading }) => {
                         {/* Pression */}
                         <div>
                             <label className="block text-sm font-medium text-dark-muted mb-2">
-                                Pression (bar)
+                                Pression (bar) <span className="text-red-400">*</span>
                             </label>
                             <input
                                 type="number"
                                 name="pression"
                                 value={formData.pression}
                                 onChange={handleChange}
+                                required
                                 step="0.1"
                                 min="0"
                                 placeholder="Ex: 8.5"
@@ -218,38 +188,18 @@ const PneuModal = ({ isOpen, onClose, onSubmit, pneu, loading }) => {
                             />
                         </div>
 
-                        {/* Profondeur Sculpture */}
+                        {/* Date de Montage */}
                         <div>
                             <label className="block text-sm font-medium text-dark-muted mb-2">
-                                Profondeur Sculpture (mm)
+                                Date de Montage <span className="text-red-400">*</span>
                             </label>
                             <input
-                                type="number"
-                                name="profondeurSculpture"
-                                value={formData.profondeurSculpture}
-                                onChange={handleChange}
-                                step="0.1"
-                                min="0"
-                                placeholder="Ex: 8.5"
-                                className="w-full px-4 py-3 glass-card rounded-lg text-white placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
-                            />
-                        </div>
-
-                        {/* Usure Pourcentage */}
-                        <div>
-                            <label className="block text-sm font-medium text-dark-muted mb-2">
-                                Usure (%) <span className="text-red-400">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                name="usurePourcentage"
-                                value={formData.usurePourcentage}
+                                type="date"
+                                name="dateMontage"
+                                value={formData.dateMontage}
                                 onChange={handleChange}
                                 required
-                                min="0"
-                                max="100"
-                                placeholder="Ex: 25"
-                                className="w-full px-4 py-3 glass-card rounded-lg text-white placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                className="w-full px-4 py-3 glass-card rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
                             />
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const RemorqueModal = ({ isOpen, onClose, onSubmit, remorque, loading }) => {
+const RemorqueModal = ({ isOpen, onClose, onSubmit, remorque, loading, error }) => {
     const [formData, setFormData] = useState({
         matricule: '',
         type: 'FRIGORIFIQUE',

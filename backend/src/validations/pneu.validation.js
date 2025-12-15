@@ -26,7 +26,6 @@ export const createPneuSchema = yup.object({
     .default(0),
   dateInstallation: yup
     .date()
-    .max(new Date(), "La date d'installation ne peut pas être dans le futur")
     .default(() => new Date()),
   camion: yup
     .string()

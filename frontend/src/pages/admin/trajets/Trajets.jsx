@@ -16,6 +16,7 @@ const Trajets = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [trajetToDelete, setTrajetToDelete] = useState(null);
     const [notification, setNotification] = useState(null);
+    const [modalError, setModalError] = useState(null);
 
     const getStatusColor = (statut) => {
         switch (statut) {
@@ -61,6 +62,7 @@ const Trajets = () => {
 
     const handleSubmit = async (trajetData) => {
         try {
+            setModalError(null);
             if (selectedTrajet) {
                 await dispatch(updateTrajet({ 
                     id: selectedTrajet._id, 
@@ -74,12 +76,13 @@ const Trajets = () => {
             setIsModalOpen(false);
             setSelectedTrajet(null);
         } catch (err) {
-            showNotification(err || 'Une erreur est survenue', 'error');
+            setModalError(err || 'Une erreur est survenue');
         }
     };
 
     const handleEdit = (trajet) => {
         setSelectedTrajet(trajet);
+        setModalError(null);
         setIsModalOpen(true);
     };
 
@@ -101,6 +104,7 @@ const Trajets = () => {
 
     const handleAddNew = () => {
         setSelectedTrajet(null);
+        setModalError(null);
         setIsModalOpen(true);
     };
 
@@ -284,10 +288,12 @@ const Trajets = () => {
                 onClose={() => {
                     setIsModalOpen(false);
                     setSelectedTrajet(null);
+                    setModalError(null);
                 }}
                 onSubmit={handleSubmit}
                 trajet={selectedTrajet}
                 loading={loading}
+                error={modalError}
             />
 
             {showDeleteConfirm && (
