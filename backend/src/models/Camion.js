@@ -73,18 +73,12 @@ camionSchema.index({ status: 1 });
 
 // Middleware pre-remove pour cascade delete (COMPOSITION)
 // Supprimer tous les pneus associés quand le camion est supprimé
-camionSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-  try {
-    const Pneu = mongoose.model('Pneu');
-    await Pneu.deleteMany({ camion: this._id });
-    
-    const Maintenance = mongoose.model('Maintenance');
-    await Maintenance.deleteMany({ camion: this._id });
-    
-    next();
-  } catch (error) {
-    next(error);
-  }
+camionSchema.pre('deleteOne', { document: true, query: false }, async function () {
+  const Pneu = mongoose.model('Pneu');
+  await Pneu.deleteMany({ camion: this._id });
+  
+  const Maintenance = mongoose.model('Maintenance');
+  await Maintenance.deleteMany({ camion: this._id });
 });
 
 // Virtual pour obtenir tous les pneus du camion

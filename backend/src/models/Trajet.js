@@ -7,7 +7,7 @@ const trajetSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'Le chauffeur est requis'],
     },
-    
+
     camion: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Camion',
@@ -91,14 +91,9 @@ trajetSchema.index({ statut: 1, dateDepart: -1 });
 
 // Middleware pre-remove pour cascade delete (COMPOSITION)
 // Supprimer tous les FuelLogs associés quand le trajet est supprimé
-trajetSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-  try {
-    const FuelLog = mongoose.model('FuelLog');
-    await FuelLog.deleteMany({ trajet: this._id });
-    next();
-  } catch (error) {
-    next(error);
-  }
+trajetSchema.pre('deleteOne', { document: true, query: false }, async function () {
+  const FuelLog = mongoose.model('FuelLog');
+  await FuelLog.deleteMany({ trajet: this._id });
 });
 
 // Virtual pour calculer la distance parcourue

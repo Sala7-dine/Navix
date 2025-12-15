@@ -82,7 +82,6 @@ export const resetPasswordSchema = yup.object({
 });
 
 export const refreshTokenSchema = yup.object({
-  refreshToken: yup
-    .string()
-    .required('Le refresh token est obligatoire'),
+  // Le refresh token est envoyé via cookie HTTP-only, pas dans le body
+  // Pas de validation nécessaire ici
 });

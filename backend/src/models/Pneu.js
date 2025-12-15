@@ -48,14 +48,9 @@ pneuSchema.index({ usurePourcentage: 1 });
 
 // Middleware pre-remove pour cascade delete (COMPOSITION)
 // Supprimer toutes les maintenances associées quand le pneu est supprimé
-pneuSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-  try {
-    const Maintenance = mongoose.model('Maintenance');
-    await Maintenance.deleteMany({ pneu: this._id });
-    next();
-  } catch (error) {
-    next(error);
-  }
+pneuSchema.pre('deleteOne', { document: true, query: false }, async function () {
+  const Maintenance = mongoose.model('Maintenance');
+  await Maintenance.deleteMany({ pneu: this._id });
 });
 
 // Virtual pour obtenir toutes les maintenances du pneu

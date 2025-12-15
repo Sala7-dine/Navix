@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
-router.post('/refresh', validate(refreshTokenSchema), refresh);
+router.post('/refresh', refresh); // Pas de validation car le token vient du cookie
 
 router.post('/logout', logout);
 

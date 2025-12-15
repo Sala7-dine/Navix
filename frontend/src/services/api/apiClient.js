@@ -40,18 +40,26 @@ apiClient.interceptors.response.use(
 
       try {
         // Le refreshToken est envoyé automatiquement via le cookie
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
-          withCredentials: true,
-        });
+        const response = await axios.post(
+          `${API_BASE_URL}/auth/refresh`, 
+          {}, // Body vide, le cookie contient le refresh token
+          {
+            withCredentials: true, // Important pour envoyer le cookie
+          }
+        );
 
         const { accessToken } = response.data;
-        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
-
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return apiClient(originalRequest);
+        
+        if (accessToken) {
+          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
+          
+          // Retry original request with new token
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return apiClient(originalRequest);
+        }
       } catch (refreshError) {
         // Refresh failed, logout user
+        console.error('Refresh token failed:', refreshError);
         localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
         localStorage.removeItem(STORAGE_KEYS.USER_DATA);
         window.location.href = '/login';
