@@ -89,3 +89,23 @@ export const getCamionsDisponibles = async () => {
         throw new Error(err.message);
     }
 }
+
+export const getTotalTrajetCamions = async () => {
+
+    try {
+
+        const camions = await getAllCamions();
+
+        camions.map( async (camion) => {
+            const count = await Trajet.countDocuments({camion : camion._id});
+            return {
+                matricule: camion.matricule,
+                nombreTrajets: count
+            };
+        })
+
+    }catch(err){
+        throw new Error(err.message);
+    }
+
+}

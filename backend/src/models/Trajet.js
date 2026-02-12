@@ -89,8 +89,7 @@ trajetSchema.index({ statut: 1 });
 // Index composé pour les recherches de trajets actifs
 trajetSchema.index({ statut: 1, dateDepart: -1 });
 
-// Middleware pre-remove pour cascade delete (COMPOSITION)
-// Supprimer tous les FuelLogs associés quand le trajet est supprimé
+// Middleware pre-remove pour cascade delete
 trajetSchema.pre('deleteOne', { document: true, query: false }, async function () {
   const FuelLog = mongoose.model('FuelLog');
   await FuelLog.deleteMany({ trajet: this._id });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { LoginPage, RegisterPage, AdminDashboard, ChauffeurDashboard } from './pages';
+import { LoginPage, RegisterPage, AdminDashboard, ChauffeurDashboard, LandingPage } from './pages';
 import PendingApproval from './pages/auth/PendingApproval';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -9,7 +9,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/pending" element={<PendingApproval />} />

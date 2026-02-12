@@ -4,7 +4,8 @@ import {
     deleteCamion, 
     getCamionById, 
     getAllCamions,
-    getCamionsDisponibles 
+    getCamionsDisponibles,
+    getTotalTrajetCamions
 } from "../services/camionService.js";
 
 
@@ -109,4 +110,26 @@ export const GetCamionsDisponibles = async (req, res) => {
             message: err.message
         });
     }
+}
+
+export const TrajetsParCamion = async (req , res) => {
+
+    try {
+
+        const camions = getTotalTrajetCamions();
+
+        res.status(200).json({
+            success: true,
+            count: camions.length,
+            data: camions
+        });
+
+
+    }catch(err){
+        res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+
 }

@@ -16,7 +16,7 @@ export async function authenticate(req, res, next) {
       return res.status(401).json({ error: 'Utilisateur introuvable' });
 
     // Vérifier si l'utilisateur est actif
-    if (!user.status) {
+    if (!user.status && user.role === 'chauffeur') {
       return res.status(403).json({ 
         error: 'Compte inactif', 
         message: 'Votre compte est en attente d\'activation par un administrateur',

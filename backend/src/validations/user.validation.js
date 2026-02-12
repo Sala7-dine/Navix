@@ -7,7 +7,7 @@ export const createUserSchema = yup.object({
     .email('Email invalide')
     .required("L'email est obligatoire"),
   password: yup.string().min(8, 'Minimum 8 caractères').required(),
-  role: yup.string().oneOf(['admin', 'chauffeur']).required('Le rôle est obligatoire'),
+  role: yup.string().oneOf(['admin', 'chauffeur']).required('Le rôle est obligatoire')
 });
 
 export const updateUserSchema = yup.object({
@@ -15,12 +15,12 @@ export const updateUserSchema = yup.object({
   email: yup.string().email('Email invalide'),
   password: yup.string().min(8, 'Minimum 8 caractères'),
   role: yup.string().oneOf(['admin', 'chauffeur']),
-  status: yup.boolean(),
+  status: yup.boolean()
 });
 
 export const updateProfileSchema = yup.object({
   fullName: yup.string().min(3).max(50).optional(),
   email: yup.string().email('Email invalide').optional(),
   password: yup.string().min(8, 'Minimum 8 caractères').optional(),
-  profileImage: yup.string().optional(),
+  profileImage: yup.string().optional()
 });

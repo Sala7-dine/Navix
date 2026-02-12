@@ -17,7 +17,7 @@ const Trajets = () => {
     const [trajetToDelete, setTrajetToDelete] = useState(null);
     const [notification, setNotification] = useState(null);
     const [modalError, setModalError] = useState(null);
-
+    console.log(trajets[0].lieuDepart);
     const getStatusColor = (statut) => {
         switch (statut) {
             case 'PLANIFIE':
@@ -255,7 +255,7 @@ const Trajets = () => {
                                         </td>
                                         <td className="py-4 px-4">
                                             <div className="flex gap-2">
-                                                <button 
+                                                <button
                                                     onClick={() => handleEdit(trajet)}
                                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                                                     title="Modifier"
@@ -264,7 +264,7 @@ const Trajets = () => {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => handleDeleteClick(trajet)}
                                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                                                     title="Supprimer"

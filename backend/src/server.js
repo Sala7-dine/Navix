@@ -33,18 +33,6 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-// secure headers
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
-
-// Middleware pour ajouter les headers cross-origin aux images
-app.use('/images', (req, res, next) => {
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  res.header('Access-Control-Allow-Origin', '*');
-  next();
-}, express.static('public'));
-
 // Routes publiques
 app.use('/api/auth', authRoutes);
 // Routes protégées par authentification

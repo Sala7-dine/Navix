@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   // Vérifier si l'utilisateur est actif
-  if (!user.status) {
+  if (!user.status && user.role === 'chauffeur') {
     return <Navigate to="/pending" replace />;
   }
 

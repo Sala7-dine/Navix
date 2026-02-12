@@ -6,7 +6,7 @@ import {
     GetUserById, 
     UpdateUser, 
     DeleteUser,
-    GetChauffeurs 
+    GetChauffeurs
 } from "../contollers/userController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 import { requireAdmin } from "../middlewares/roleMiddleware.js";
